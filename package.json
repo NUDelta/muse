@@ -1,0 +1,16 @@
+{
+  "name": "muse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Victoria Cabales",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/events-api": "^2.1.1",
+    "express": "^4.16.4",
+    "request": "^2.88.0"
+  }
+}
