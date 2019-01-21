@@ -95,6 +95,27 @@ bot.startRTM((err,bot,payload) => {
 
 controller.startTicking();
 
+// Get information about all users
+// Should update storage
+var options = {token: process.env.botToken};
+let users;
+console.log("calling on bot users");
+bot.api.users.list(options, (err,res) => {
+  if (!err) {
+    // console.log(res);
+    console.log("updating users");
+    users = res; // TODO: make a promise so this updates
+    // console.log(users);
+  }
+  else {
+    console.log(err);
+  }
+});
+
+setTimeout(function afterTwoSeconds() {
+  console.log(users)
+}, 2000)
+
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var webserver = require(__dirname + '/components/express_webserver.js')(controller);
 
@@ -171,15 +192,246 @@ if (!process.env.clientId || !process.env.clientSecret) {
   // }
 }
 
-controller.hears('hello', 'direct_message', function (bot, message) {
+controller.hears( // TODO: Get muse to reply in any channel
+  ['hello', 'hi', 'greetings'], [
+    'direct_mention', 'mention', 'direct_message'],
+    function (bot, message) {
     bot.reply(message, 'Hello!');
-});
+  }
+);
 
 controller.hears('help pls', 'direct_message', function(bot, message) {
     bot.reply(message, 'I can help you!');
+    console.log(`Message from ${message.user}: ${message.text}`);
+
 });
 
+// controller.hears('something', function(bot, message) {
+//
+//     var ids = message.callback_id.split(/\-/);
+//     var user_id = ids[0];
+//     var item_id = ids[1];
+//
+//     controller.storage.users.get(user_id, function(err, user) {
+//
+//         if (!user) {
+//             user = {
+//                 id: user_id,
+//                 list: []
+//             }
+//         }
+//
+//         for (var x = 0; x < user.list.length; x++) {
+//             if (user.list[x].id == item_id) {
+//                 if (message.actions[0].value=='flag') {
+//                     user.list[x].flagged = !user.list[x].flagged;
+//                 }
+//                 if (message.actions[0].value=='delete') {
+//                     user.list.splice(x,1);
+//                 }
+//             }
+//         }
+//
+//
+//         var reply = {
+//             text: 'Here is <@' + user_id + '>s list:',
+//             attachments: [],
+//         }
+//
+//         for (var x = 0; x < user.list.length; x++) {
+//             reply.attachments.push({
+//                 title: user.list[x].text + (user.list[x].flagged? ' *FLAGGED*' : ''),
+//                 callback_id: user_id + '-' + user.list[x].id,
+//                 attachment_type: 'default',
+//                 actions: [
+//                     {
+//                         "name":"flag",
+//                         "text": ":waving_black_flag: Flag",
+//                         "value": "flag",
+//                         "type": "button",
+//                     },
+//                     {
+//                        "text": "Delete",
+//                         "name": "delete",
+//                         "value": "delete",
+//                         "style": "danger",
+//                         "type": "button",
+//                         "confirm": {
+//                           "title": "Are you sure?",
+//                           "text": "This will do something!",
+//                           "ok_text": "Yes",
+//                           "dismiss_text": "No"
+//                         }
+//                     }
+//                 ]
+//             })
+//         }
+//
+//         bot.replyInteractive(message, reply);
+//         controller.storage.users.save(user);
+//
+//
+//     });
+//
+// });
+//
+// controller.hears(['list','tasks'],'direct_mention,direct_message',function(bot,message) {
+//
+//     controller.storage.users.get(message.user, function(err, user) {
+//
+//         if (!user) {
+//             user = {
+//                 id: message.user,
+//                 list: []
+//             }
+//         }
+//
+//         if (!user.list || !user.list.length) {
+//             user.list = [
+//                 {
+//                     'id': 1,
+//                     'text': 'Test Item 1'
+//                 },
+//                 {
+//                     'id': 2,
+//                     'text': 'Test Item 2'
+//                 },
+//                 {
+//                     'id': 3,
+//                     'text': 'Test Item 3'
+//                 }
+//             ]
+//         }
+//
+//         var reply = {
+//             text: 'Here is your list. Say `add <item>` to add items.',
+//             attachments: [],
+//         }
+//
+//         for (var x = 0; x < user.list.length; x++) {
+//             reply.attachments.push({
+//                 title: user.list[x].text + (user.list[x].flagged? ' *FLAGGED*' : ''),
+//                 callback_id: message.user + '-' + user.list[x].id,
+//                 attachment_type: 'default',
+//                 actions: [
+//                     {
+//                         "name":"flag",
+//                         "text": ":waving_black_flag: Flag",
+//                         "value": "flag",
+//                         "type": "button",
+//                     },
+//                     {
+//                        "text": "Delete",
+//                         "name": "delete",
+//                         "value": "delete",
+//                         "style": "danger",
+//                         "type": "button",
+//                         "confirm": {
+//                           "title": "Are you sure?",
+//                           "text": "This will do something!",
+//                           "ok_text": "Yes",
+//                           "dismiss_text": "No"
+//                         }
+//                     }
+//                 ]
+//             })
+//         }
+//
+//         bot.reply(message, reply);
+//
+//         controller.storage.users.save(user);
+//
+//     });
+//
+// });
 
+controller.hears('interactive', 'direct_message', function(bot, message) {
+
+    bot.reply(message, {
+        attachments:[
+            {
+                title: 'Do you want to interact with my buttons?',
+                callback_id: user_id + '-' + user.list[x].id,
+                attachment_type: 'default',
+                actions: [
+                    {
+                        "name":"yes",
+                        "text": "Yes",
+                        "value": "yes",
+                        "type": "button",
+                    },
+                    {
+                        "name":"no",
+                        "text": "No",
+                        "value": "no",
+                        "type": "button",
+                    }
+                ]
+            }
+        ]
+    });
+});
+
+// controller.hears('list all users', (bot, message) => {
+//   bot.api.users.list({}, (err, response) => {
+//     if (err) {
+//       console.error(err);
+//     }
+//     console.log(response);
+//     bot.reply(message, response);
+//   });
+// });
+
+// controller.hears('list all channels', (bot, message) => {
+//   bot.api.channels.list({
+//     token: process.env.TOKEN,
+//     limit: 20
+//   },function(err,response) {
+//     if (err) {
+//       console.error(err);
+//     }
+//     console.log(response);
+//   })
+// })
+
+
+// controller.storage.teams.all(function(err,teams) {
+//
+//   console.log("entering teams function");
+//
+//   if (err) {
+//     throw new Error(err);
+//   }
+//
+//   // print each team
+//   for (var t  in teams) {
+//     console.log(t);
+//   }
+//
+// });
+
+// controller.hears(['add (.*)'],'direct_mention,direct_message',function(bot,message) {
+//
+//     controller.storage.users.get(message.user, function(err, user) {
+//
+//         if (!user) {
+//             user = {
+//                 id: message.user,
+//                 list: []
+//             }
+//         }
+//
+//         user.list.push({
+//             id: message.ts,
+//             text: message.match[1],
+//         });
+//
+//         bot.reply(message,'Added to list. Say `list` to view or manage list.');
+//
+//         controller.storage.users.save(user);
+//
+//     });
+// });
 
 function usage_tip() {
     console.log('~~~~~~~~~~');
