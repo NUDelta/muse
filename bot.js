@@ -115,129 +115,24 @@ if (!process.env.clientId || !process.env.clientSecret) {
 var user_options = options;
 user_options.user = "U9SU7T32Q";
 
-
-// Muse starts conversation with user
-// bot.api.im.open(options, (err,res) => {
-//   if (err) {
-//     console.error(err);
-//   }
-//   else {
-//     bot.startConversation({
-//       user: "U9SU7T32Q",
-//       channel: res.channel.id,
-//     }, (res,convo) => {
-//       convo.ask("Hi, when would you like to receive a reminder to reflect?", (res,convo) => {
-//         console.log("printing text",res.text);
-//         console.log("printing user", res.user);
-//       });
-//     });
-//   }
-// });
-
-// controller.hears(["start reflection", "I want to reflect"],
-//   ["direct_mention", "mention", "direct_message", "ambient"],
-//   (bot,message) => {
-//     console.log("printing channel",message.channel);
-//     console.log("printing user id",message.user);
-//     bot.startConversation({
-//       user: message.user,
-//       channel: message.channel
-//     }, (res,convo) => {
-//       convo.ask('What did go over during SIG? Are you currently applying \
-// what you went over to your project? What strategies did you talk about?',
-//       {
-//         pattern: '(.*?)',
-//         callback: (res,convo) => {convo.say('Thanks for sharing!');}
-//       },
-//       {});
-//     });
-// });
-//
-// var q2 = (res,convo) => {
-//   convo.ask('What are you currently doing well, and what could you do better?', q3, {})
-// };
-//
-// var q3 = (res,convo) => {
-//   convo.say('Are you satisfied with your current progress, or do you \
-// feel the need to adjust your direction? Explain why, and if you need to make changes, \
-// detail what those changes would be.');
-// };
+var r = require(__dirname + '/components/reflection_convo.js');
+console.log(r.reflect1);
 
 controller.hears(["start reflection", "I want to reflect", "reflect"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
-    bot.createConversation(message, function(err, convo) {
-
-    // create a path for when a user says YES
-    convo.addMessage({
-            text: 'You said yes! How wonderful.',
-    },'yes_thread');
-
-    // create a path for when a user says NO
-    convo.addMessage({
-        text: 'You said no, that is too bad.',
-    },'no_thread');
-
-    // create a path where neither option was matched
-    // this message has an action field, which directs botkit to go back to the `default` thread after sending this message.
-    convo.addMessage({
-        text: "Thanks for answering! Here's the next question: ",
-        action: 'q2',
-    },'q1_response');
-
-    // Create a yes/no question in the default thread...
-    convo.addQuestion('What did go over during SIG? Are you currently applying \
-what you went over to your project? What strategies did you talk about?', [
-        {
-            pattern: 'yes',
-            callback: function(response, convo) {
-                convo.gotoThread('yes_thread');
-            },
-        },
-        {
-            pattern: 'no',
-            callback: function(response, convo) {
-                convo.gotoThread('no_thread');
-            },
-        },
-        {
-          default: true,
-          callback: (res, convo) => {
-            convo.gotoThread('q1_response');
-          }
-        }
-    ],{},'default');
-
-    convo.addQuestion('What are you currently doing well, and what could you do better?', [
-      {
-        default: true,
-        callback: (res,convo) => {
-          convo.gotoThread('bad_response');
-        }
-      }
-    ], {}, 'q2');
-
-
-
-
-    convo.activate();
+    bot.createConversation(message,(err,convo) => {
+      r.reflect1(err,convo);
+    });
 });
-  }
-);
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
     'direct_mention', 'mention', 'direct_message', 'ambient'],
     function (bot, message) {
-    bot.reply(message, 'Hello!');
+    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, or `reflect`.");
   }
 );
-
-controller.hears('help pls', 'direct_message', function(bot, message) {
-    bot.reply(message, 'I can help you!');
-    console.log(`Message from ${message.user}: ${message.text}`);
-
-});
 
 function usage_tip() {
     console.log('~~~~~~~~~~');
