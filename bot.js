@@ -14,9 +14,7 @@ var bot_options = {
     clientSecret: process.env.clientSecret,
     clientSigningSecret: process.env.clientSigningSecret,
     // debug: true,
-    scopes: ['bot'],
-    studio_token: process.env.studio_token,
-    studio_command_uri: process.env.studio_command_uri
+    scopes: ['bot']
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
@@ -47,20 +45,20 @@ controller.startTicking();
 
 // Get information about all users
 // Should update storage
-var options = {token: process.env.botToken};
-let users;
-console.log("calling on bot users");
-bot.api.users.list(options, (err,res) => {
-  if (!err) {
-    // console.log(res);
-    // console.log("updating users");
-    users = res; // TODO: make a promise so this updates
-    // console.log(users);
-  }
-  else {
-    console.log(err);
-  }
-});
+// var options = {token: process.env.botToken};
+// let users;
+// console.log("calling on bot users");
+// bot.api.users.list(options, (err,res) => {
+//   if (!err) {
+//     // console.log(res);
+//     // console.log("updating users");
+//     users = res; // TODO: make a promise so this updates
+//     // console.log(users);
+//   }
+//   else {
+//     console.log(err);
+//   }
+// });
 
 // setTimeout(function afterTwoSeconds() {
 //   console.log(users)
@@ -111,20 +109,23 @@ if (!process.env.clientId || !process.env.clientSecret) {
   });
 }
 
-// Testing with myself
-var user_options = options;
-user_options.user = "U9SU7T32Q";
-
 var r = require(__dirname + '/components/reflection_convo.js');
-console.log(r.reflect1);
 
-controller.hears(["start reflection", "I want to reflect", "reflect"],
+controller.hears(["start reflection", "I want to reflect", "reflect", "reflection round 1", "reflection 1"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
     bot.createConversation(message,(err,convo) => {
-      r.reflect1(err,convo);
+      r.reflect1(err,convo,bot,message);
     });
-});
+  });
+
+controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
+  ["direct_mention", "mention", "direct_message", "ambient"],
+  (bot,message) => {
+    bot.createConversation(message,(err,convo) => {
+      r.reflect2(err,convo);
+    });
+  });
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
