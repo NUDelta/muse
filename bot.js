@@ -46,8 +46,8 @@ controller.startTicking();
 // Get information about all users
 // Should update storage
 // var options = {token: process.env.botToken};
-// let users;
-// console.log("calling on bot users");
+// // let users;
+// // console.log("calling on bot users");
 // bot.api.users.list(options, (err,res) => {
 //   if (!err) {
 //     // console.log(res);
@@ -59,7 +59,7 @@ controller.startTicking();
 //     console.log(err);
 //   }
 // });
-
+//
 // setTimeout(function afterTwoSeconds() {
 //   console.log(users)
 // }, 2000)

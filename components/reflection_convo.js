@@ -82,6 +82,18 @@ detail what those changes would be.',
   reflect2: function(err,convo) {
     if (!err) {
       convo.activate();
+      var startTime = new Date();
+      convo.setTimeout(10800000); // convo expires after 3 hours
+
+      var followUp = () => {
+        currTime = new Date();
+        if (currTime.getTime() >= (startTime.getTime()+30*6000)) { // Ask every 30 min
+          bot.reply(message,"Are you still there? Please answer the previous reflection question!");
+          convo.silentRepeat();
+          startTime = currTime;
+        }
+      }
+      setInterval(followUp,30*6000);
 
       // Question 1
       convo.ask("How do you feel about your progress during this work \
@@ -108,12 +120,14 @@ checklist helped you.",
       convo.onTimeout((convo) => {
         convo.say("This reflection session has expired. I'll send your reflection to your mentor to make sure you discuss your blockers thoroughly."); // Include count for when mentor will be alerted
         convo.next();
+        return false;
       });
 
       convo.on('end',(convo) => {
         if (convo.status == 'completed') {
           var res = convo.extractResponses(); // Get the values for each reflection response
           console.log(res); // TODO: Store data in Mongo
+          return true;
         }
       });
     }

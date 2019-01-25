@@ -14,26 +14,23 @@ module.exports = function(res,convo,token,user) {
     var message = res.text.toLowerCase();
     var today = new Date();
     var d = today.getDate();
-    var reminders = message.split(",");
 
-    for (r in reminiders) {
-      if (r.includes("every")) {
-        var year = today.getFullYear();
-        var next = new Date();
-        while (next.getFullYear() == year) {
-          // TODO
-        }
-
+    if (r.includes("every")) {
+      var year = today.getFullYear();
+      var next = new Date();
+      while (next.getFullYear() == year) {
+        // TODO
       }
-      if (r.includes("in")) { // curr time + x
 
-      }
-      if (r.includes("at")) { // adjust hour and minute
+    }
+    if (r.includes("in")) { // curr time + x
+      if ()
+    }
+    if (r.includes("at")) { // adjust hour and minute
 
-      }
-      if (r.includes("on")) {
+    }
+    if (r.includes("on")) {
 
-      }
     }
   });
 }
