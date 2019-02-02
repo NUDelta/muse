@@ -1,2 +1,4 @@
-secrets.js
+.env
+.data
 /node_modules
+/public/users.json
