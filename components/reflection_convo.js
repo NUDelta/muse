@@ -13,14 +13,16 @@ module.exports = {
         }, {'key': 'r1_answer1'});
 
         var followUp = () => {
-          currTime = new Date();
-          if (currTime.getTime() >= (startTime.getTime()+30*6000)) { // Ask every 30 min
-            bot.reply(message,"Are you still there? Please answer the previous reflection question!");
-            convo.silentRepeat();
-            startTime = currTime;
+          if (convo.status != 'completed') {
+            currTime = new Date();
+            if (currTime.getTime() >= (startTime.getTime()+30*60000)) { // Ask every 30 min
+              bot.reply(message,"Are you still there? Please answer the previous reflection question!");
+              convo.silentRepeat();
+              startTime = currTime;
+            }
           }
         }
-        setInterval(followUp,30*6000);
+        setInterval(followUp,30*60000); // Not 30 min for some reason
 
       // Question 2
       convo.ask('What are you currently doing well, and what could you do better?',
@@ -86,14 +88,16 @@ detail what those changes would be.',
       convo.setTimeout(10800000); // convo expires after 3 hours
 
       var followUp = () => {
-        currTime = new Date();
-        if (currTime.getTime() >= (startTime.getTime()+30*6000)) { // Ask every 30 min
-          bot.reply(message,"Are you still there? Please answer the previous reflection question!");
-          convo.silentRepeat();
-          startTime = currTime;
+        if (convo.status != 'completed') {
+          currTime = new Date();
+          if (currTime.getTime() >= (startTime.getTime()+30*60000)) { // Ask every 30 min
+            bot.reply(message,"Are you still there? Please answer the previous reflection question!");
+            convo.silentRepeat();
+            startTime = currTime;
+          }
         }
       }
-      setInterval(followUp,30*6000);
+      setInterval(followUp,30*60000);
 
       // Question 1
       convo.ask("How do you feel about your progress during this work \
