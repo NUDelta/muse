@@ -1,5 +1,5 @@
-var env = require('node-env-file');
-env(__dirname + '/.env');
+// var env = require('node-env-file');
+// env(__dirname + '/.env');
 
 
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
