@@ -5,7 +5,6 @@ var querystring = require('querystring');
 var debug = require('debug')('botkit:webserver');
 var http = require('http');
 var hbs = require('express-hbs');
-require('heroku-self-ping')('http://muse-delta.herokuapp.com/')
 
 module.exports = function(controller) {
 
@@ -46,6 +45,10 @@ module.exports = function(controller) {
 
     controller.webserver = webserver;
     controller.httpserver = server;
+
+    setInterval(function() {
+      http.get("http://muse-delta.herokuapp.com/");
+    }, 20*60000); // Ping every 20 min to keep from shutting down
 
     return webserver;
 

@@ -16,7 +16,6 @@
     "debug": "^2.3.3",
     "express": "^4.14.0",
     "express-hbs": "^1.0.4",
-    "heroku-self-ping": "^2.0.0",
     "node-env-file": "^0.1.8",
     "npm": "^6.6.0",
     "querystring": "^0.2.0",
