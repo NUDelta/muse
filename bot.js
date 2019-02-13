@@ -1,5 +1,5 @@
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-env(__dirname + '/.env');
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// env(__dirname + '/.env');
 
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   usage_tip();
