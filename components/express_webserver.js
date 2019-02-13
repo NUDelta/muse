@@ -5,6 +5,7 @@ var querystring = require('querystring');
 var debug = require('debug')('botkit:webserver');
 var http = require('http');
 var hbs = require('express-hbs');
+require('heroku-self-ping')('http://muse-delta.herokuapp.com/')
 
 module.exports = function(controller) {
 
