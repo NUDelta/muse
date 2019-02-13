@@ -1,5 +1,5 @@
-// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-// env(__dirname + '/.env');
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+env(__dirname + '/.env');
 
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   usage_tip();
@@ -33,14 +33,23 @@ var bot = controller.spawn({
   token: process.env.botToken
 });
 
-bot.startRTM((err,bot,payload) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
+function start_rtm() {
+  try {
+    bot.startRTM();
   }
-});
+  catch(err) {
+    console.error(err);
+    return setTimeout(start_rtm, 60000); // Try again in 1 minute
+  }
+}
+
+start_rtm();
 
 controller.startTicking();
+
+controller.on('rtm_close', (bot,err) => {
+  start_rtm();
+});
 
 // Get information about all users
 // Should update storage
