@@ -1,5 +1,5 @@
-// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-// env(__dirname + '/.env');
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+env(__dirname + '/.env');
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   usage_tip();
 }
@@ -16,7 +16,7 @@ var bot_options = {
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
-// Mongo is automatically configured when deploying to Heroku
+// Mongo is automatiquitcally configured when deploying to Heroku
 if (process.env.MONGO_URI) {
     var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
     bot_options.storage = mongoStorage;
@@ -71,6 +71,20 @@ controller.on('rtm_close', (bot,err) => {
 //   console.log(users)
 // }, 2000)
 
+// bot.api.chat.postMessage({
+//   token: process.env.botToken,
+//   channel: "@vcabales",
+//   text: '</remind> <@vcabales> "go to the gym" in 10 minutes'
+// }, (err, res) => {
+//   if (!err) {
+//     console.log(res);
+//     console.log("sending message to channel");
+//   }
+//   else {
+//     console.log(err);
+//   }
+// })
+
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var webserver = require(__dirname + '/components/express_webserver.js')(controller);
 
@@ -118,27 +132,51 @@ if (!process.env.clientId || !process.env.clientSecret) {
 
 var r = require(__dirname + '/components/reflection_convo.js');
 
-controller.hears(["start reflection", "I want to reflect", "reflect", "reflection round 1", "reflection 1"],
+controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect1(err,convo,bot,message);
+    var res = bot.createConversation(message,(err,convo) => {
+      var res = r.reflect1(err,convo,bot,message);
+      res.userId = message.user;
+      let userName = null;
+      bot.api.users.info({user: message.user}, (err,res) => {
+        if (!err) {
+          userName = res["user"]["name"];
+        }
+      });
+      if (userName !== null) {
+        res.userName = userName;
+      }
+      return res;
     });
+    controller.storage.round1.save(res); // TODO: Test this
   });
 
 controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect2(err,convo);
+    var res = bot.createConversation(message,(err,convo) => {
+      var res = r.reflect2(err,convo);
+      res.userId = message.user;
+      let userName = null;
+      bot.api.users.info({user: message.user}, (err,res) => {
+        if (!err) {
+          userName = res["user"]["name"];
+        }
+      });
+      if (userName !== null) {
+        res.userName = userName;
+      }
+      return res;
     });
+    contorller.storage.round2.save(res);
   });
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
     'direct_mention', 'mention', 'direct_message', 'ambient'],
     function (bot, message) {
-    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, or `reflect`.");
+    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, `reflection round 1`.");
   }
 );
 

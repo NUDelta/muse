@@ -12,7 +12,7 @@ module.exports = {
           convo.next();
         }, {'key': 'r1_answer1'});
 
-        var followUp = () => {
+        var followUp = () => { // Bug in the follow-up
           if (convo.status != 'completed') {
             currTime = new Date();
             if (currTime.getTime() >= (startTime.getTime()+30*60000)) { // Ask every 30 min
@@ -36,35 +36,42 @@ feel the need to adjust your direction? Explain why, and if you need to make cha
 detail what those changes would be.',
         (res,convo) => {
           convo.say("Thanks for reflecting with me! I've recorded your responses!")
-          askTime(res,convo);
+          askTime(res,convo,message);
           convo.next();
         }, {'key': 'r1_answer3'});
 
       // Set up reminder
-      var askTime = (res,convo) => {
+      var askTime = (res,convo,message) => {
         convo.ask("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
-            verifyTime(res,convo);
+            verifyTime(res,convo,message);
             convo.next();
           }, {'key': 'next_time'});
       }
 
-      var verifyTime = (res,convo) => {
+      var verifyTime = (res,convo,message) => {
         const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
         const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
-        convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text}. Is that ok?`,(res,convo) => {
-          if (yes.includes(res.text.toLowerCase())) {
+        convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text}. Is that ok?`,(res2,convo) => {
+          if (yes.includes(res2.text.toLowerCase())) {
             console.log("user replied yes");
-            convo.say("Great, I'll ping you then! You have successfully completed your reflection!")
+            convo.say("Great, I'll ping you then! You have successfully completed your reflection!");
+            bot.api.reminders.add({
+              // var env = require('node-env-file');
+              token: process.env.botToken,
+              text: "Start reflection round 2 with <@muse>!",
+              time: res.text,
+              user: message.user
+            });
             convo.next();
           }
           else if (no.includes(res.text.toLowerCase())) {
-            askTime(res,convo);
+            askTime(res,convo,message);
             convo.next();
           }
           else {
             convo.say("Sorry, I didn't understand that.");
-            askTime(res,convo);
+            askTime(res,convo,message);
           }
         }, {});
       }
@@ -74,6 +81,7 @@ detail what those changes would be.',
           // TODO: Set timeout for unfinished reflections
           var res = convo.extractResponses(); // Get the values for each reflection response
           console.log(res); // TODO: Store data in Mongo
+          return res;
         }
       });
     }
@@ -92,7 +100,7 @@ detail what those changes would be.',
           currTime = new Date();
           if (currTime.getTime() >= (startTime.getTime()+30*60000)) { // Ask every 30 min
             bot.reply(message,"Are you still there? Please answer the previous reflection question!");
-            convo.silentRepeat();
+            convo.silentRepeat(); // check what this does
             startTime = currTime;
           }
         }
@@ -131,7 +139,7 @@ checklist helped you.",
         if (convo.status == 'completed') {
           var res = convo.extractResponses(); // Get the values for each reflection response
           console.log(res); // TODO: Store data in Mongo
-          return true;
+          return res;
         }
       });
     }
