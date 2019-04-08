@@ -1,4 +1,6 @@
 var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+var MongoClient = require('mongodb').MongoClient;
+
 env(__dirname + '/.env');
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   usage_tip();
@@ -132,44 +134,41 @@ if (!process.env.clientId || !process.env.clientSecret) {
 
 var r = require(__dirname + '/components/reflection_convo.js');
 
+function postToMongo(obj) {
+  if (process.env.MONGO_URI) {
+    MongoClient.connect(uri, (err,db) => {
+      if (err) throw err;
+      var dbo = db.db("muse");
+      dbo.collection("reflections").insertOne(obj, (err,res) => {
+        if (err) throw err;
+        console.log("document inserted");
+        db.close();
+      });
+    });
+  }
+}
+
 controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
-    var res = bot.createConversation(message,(err,convo) => {
-      var res = r.reflect1(err,convo,bot,message);
-      res.userId = message.user;
-      let userName = null;
-      bot.api.users.info({user: message.user}, (err,res) => {
-        if (!err) {
-          userName = res["user"]["name"];
-        }
+    bot.createConversation(message,(err,convo) => {
+      r.reflect1(err,convo,bot,message, (res) => {
+        postToMongo(res);
       });
-      if (userName !== null) {
-        res.userName = userName;
-      }
-      return res;
     });
-    controller.storage.round1.save(res); // TODO: Test this
+    // controller.storage.users.save(res); // TODO: Test this
   });
 
 controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
   ["direct_mention", "mention", "direct_message", "ambient"],
   (bot,message) => {
-    var res = bot.createConversation(message,(err,convo) => {
-      var res = r.reflect2(err,convo);
-      res.userId = message.user;
-      let userName = null;
-      bot.api.users.info({user: message.user}, (err,res) => {
-        if (!err) {
-          userName = res["user"]["name"];
-        }
+    bot.createConversation(message,(err,convo) => {
+      r.reflect2(err,convo,bot,message, (res) => {
+        postToMongo(res);
       });
-      if (userName !== null) {
-        res.userName = userName;
-      }
-      return res;
     });
-    contorller.storage.round2.save(res);
+
+    // contorller.storage.round2.save(res);
   });
 
 controller.hears(

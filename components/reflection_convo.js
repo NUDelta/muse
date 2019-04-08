@@ -1,5 +1,5 @@
 module.exports = {
-  reflect1: function(err,convo,bot,message) {
+  reflect1: function(err,convo,bot,message,callback) {
     if (!err) {
       convo.activate();
       var startTime = new Date();
@@ -40,7 +40,6 @@ detail what those changes would be.',
           convo.next();
         }, {'key': 'r1_answer3'});
 
-      // Set up reminder
       var askTime = (res,convo,message) => {
         convo.ask("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
@@ -56,12 +55,25 @@ detail what those changes would be.',
           if (yes.includes(res2.text.toLowerCase())) {
             console.log("user replied yes");
             convo.say("Great, I'll ping you then! You have successfully completed your reflection!");
+
+            var env = require('node-env-file'); // comment out for Heroku
+            path = require('path');
+            let reqPath = path.join(__dirname, '../.env');
+            env(reqPath);
+
             bot.api.reminders.add({
-              // var env = require('node-env-file');
-              token: process.env.botToken,
+              token: process.env.oAuthToken,
               text: "Start reflection round 2 with <@muse>!",
               time: res.text,
               user: message.user
+            }, (err,res) => {
+              if (err) {
+                convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
+                askTime(res,convo,message);
+              }
+              if (!err) {
+                console.log(res);
+              }
             });
             convo.next();
           }
@@ -80,8 +92,30 @@ detail what those changes would be.',
         if (convo.status == 'completed') {
           // TODO: Set timeout for unfinished reflections
           var res = convo.extractResponses(); // Get the values for each reflection response
+          res.userId = message.user;
+          res.time = new Date();
+          res.round = 1;
+          let userName = null;
+
+          var env = require('node-env-file'); // comment out for Heroku
+          path = require('path');
+          let reqPath = path.join(__dirname, '../.env');
+          env(reqPath);
+
+          bot.api.users.info({
+            token: process.env.oAuthToken,
+            user: message.user
+          }, (err,res) => {
+            if (err) console.log(err);
+            if (!err) {
+              userName = res["user"]["name"];
+            }
+          });
+          if (userName) {
+            res.userName = userName;
+          }
           console.log(res); // TODO: Store data in Mongo
-          return res;
+          callback(res);
         }
       });
     }
@@ -89,7 +123,7 @@ detail what those changes would be.',
       console.error(err);
     }
   },
-  reflect2: function(err,convo) {
+  reflect2: function(err,convo,bot,message,callback) {
     if (!err) {
       convo.activate();
       var startTime = new Date();
@@ -135,11 +169,23 @@ checklist helped you.",
         return false;
       });
 
-      convo.on('end',(convo) => {
+      convo.on('end',(convo, message) => {
         if (convo.status == 'completed') {
           var res = convo.extractResponses(); // Get the values for each reflection response
+          res.userId = message.user;
+          res.time = new Date();
+          res.round = 1;
+          let userName = null;
+          bot.api.users.info({user: message.user}, (err,res) => {
+            if (!err) {
+              userName = res["user"]["name"];
+            }
+          });
+          if (userName !== null) {
+            res.userName = userName;
+          }
           console.log(res); // TODO: Store data in Mongo
-          return res;
+          callback(res);
         }
       });
     }
