@@ -54,7 +54,7 @@ detail what those changes would be.',
         convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text}. Is that ok?`,(res2,convo) => {
           if (yes.includes(res2.text.toLowerCase())) {
             console.log("user replied yes");
-            convo.say("Great, I'll ping you then! You have successfully completed your reflection!");
+            convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
 
             var env = require('node-env-file'); // comment out for Heroku
             path = require('path');
@@ -70,9 +70,6 @@ detail what those changes would be.',
               if (err) {
                 convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
                 askTime(res,convo,message);
-              }
-              if (!err) {
-                console.log(res);
               }
             });
             convo.next();
@@ -95,27 +92,32 @@ detail what those changes would be.',
           res.userId = message.user;
           res.time = new Date();
           res.round = 1;
-          let userName = null;
 
           var env = require('node-env-file'); // comment out for Heroku
           path = require('path');
           let reqPath = path.join(__dirname, '../.env');
           env(reqPath);
 
-          bot.api.users.info({
-            token: process.env.oAuthToken,
-            user: message.user
-          }, (err,res) => {
-            if (err) console.log(err);
-            if (!err) {
-              userName = res["user"]["name"];
-            }
-          });
-          if (userName) {
-            res.userName = userName;
+          async function getUserName(obj,callback) {
+            let response = await bot.api.users.info({
+              token: process.env.oAuthToken,
+              user: message.user
+            }, (err,res) => {
+              if (err) console.error(err);
+              if (!err) {
+                obj.userRealName = res.user.real_name;
+                obj.userName = res.user.name;
+                callback(obj);
+              }
+            });
           }
-          console.log(res); // TODO: Store data in Mongo
-          callback(res);
+          try {
+            getUserName(res,callback);
+          }
+          catch (err) {
+            console.error(err);
+            callback(res);
+          }
         }
       });
     }
