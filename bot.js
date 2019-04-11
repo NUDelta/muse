@@ -132,8 +132,6 @@ if (!process.env.clientId || !process.env.clientSecret) {
   });
 }
 
-var r = require(__dirname + '/components/reflection_convo.js');
-
 function postToMongo(obj) {
   if (process.env.MONGO_URI) {
     MongoClient.connect(uri, (err,db) => {
@@ -147,29 +145,6 @@ function postToMongo(obj) {
     });
   }
 }
-
-controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"],
-  ["direct_mention", "mention", "direct_message", "ambient"],
-  (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect1(err,convo,bot,message, (res) => {
-        postToMongo(res);
-      });
-    });
-    // controller.storage.users.save(res); // TODO: Test this
-  });
-
-controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
-  ["direct_mention", "mention", "direct_message", "ambient"],
-  (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect2(err,convo,bot,message, (res) => {
-        postToMongo(res);
-      });
-    });
-
-    // contorller.storage.round2.save(res);
-  });
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
