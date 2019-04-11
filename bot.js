@@ -1,5 +1,7 @@
 // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-// env(__dirname + '/.env');
+var MongoClient = require('mongodb').MongoClient;
+
+env(__dirname + '/.env');
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   usage_tip();
 }
@@ -71,6 +73,20 @@ controller.on('rtm_close', (bot,err) => {
 //   console.log(users)
 // }, 2000)
 
+// bot.api.chat.postMessage({
+//   token: process.env.botToken,
+//   channel: "@vcabales",
+//   text: '</remind> <@vcabales> "go to the gym" in 10 minutes'
+// }, (err, res) => {
+//   if (!err) {
+//     console.log(res);
+//     console.log("sending message to channel");
+//   }
+//   else {
+//     console.log(err);
+//   }
+// })
+
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var webserver = require(__dirname + '/components/express_webserver.js')(controller);
 
@@ -116,29 +132,25 @@ if (!process.env.clientId || !process.env.clientSecret) {
   });
 }
 
-var r = require(__dirname + '/components/reflection_convo.js');
-
-controller.hears(["start reflection", "I want to reflect", "reflect", "reflection round 1", "reflection 1"],
-  ["direct_mention", "mention", "direct_message", "ambient"],
-  (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect1(err,convo,bot,message);
+function postToMongo(obj) {
+  if (process.env.MONGO_URI) {
+    MongoClient.connect(uri, (err,db) => {
+      if (err) throw err;
+      var dbo = db.db("muse");
+      dbo.collection("reflections").insertOne(obj, (err,res) => {
+        if (err) throw err;
+        console.log("document inserted");
+        db.close();
+      });
     });
-  });
-
-controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
-  ["direct_mention", "mention", "direct_message", "ambient"],
-  (bot,message) => {
-    bot.createConversation(message,(err,convo) => {
-      r.reflect2(err,convo);
-    });
-  });
+  }
+}
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
     'direct_mention', 'mention', 'direct_message', 'ambient'],
     function (bot, message) {
-    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, or `reflect`.");
+    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, `reflection round 1`.");
   }
 );
 

@@ -27,13 +27,9 @@ module.exports = {
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       bot.reply(message, "Here are a few commands I know \n \
-      `reflect`: Start the first round of your reflection \n \
+      `reflection round 1`: Start the first round of your reflection \n \
       `reflection round 2`: Start the second round of your reflection \n \
       `list commands`: List the commands I know");
     });
   }
 }
-
-
-// `peer review reflection`: Send your reflection to a peer and receive feedback \n \
-// `mentor review reflection`: Send your reflection to your mentor and receive feedback"
