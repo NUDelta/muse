@@ -5,9 +5,15 @@ var querystring = require('querystring');
 var debug = require('debug')('botkit:webserver');
 var http = require('http');
 var hbs = require('express-hbs');
+const { createMessageAdapter } = require('@slack/interactive-messages');
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 
 module.exports = function(controller) {
-
+    var env = require('node-env-file'); // comment out for Heroku
+    path = require('path');
+    let reqPath = path.join(__dirname, '../.env');
+    env(reqPath);
+    const slackInteractions = createMessageAdapter(process.env.clientSigningSecret);
     var webserver = express();
     webserver.use(function(req, res, next) {
         req.rawBody = '';
@@ -18,6 +24,7 @@ module.exports = function(controller) {
 
         next();
     });
+    webserver.use('/slack/actions', slackInteractions.expressMiddleware());
     webserver.use(cookieParser());
     webserver.use(bodyParser.json());
     webserver.use(bodyParser.urlencoded({ extended: true }));
@@ -50,6 +57,6 @@ module.exports = function(controller) {
       http.get("http://muse-delta.herokuapp.com/");
     }, 20*60000); // Ping every 20 min to keep from shutting down
 
-    return webserver;
+    return [webserver, slackInteractions];
 
 }

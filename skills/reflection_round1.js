@@ -9,8 +9,8 @@ module.exports = function(controller) {
           convo.setTimeout(10800000); // convo expires after 3 hours
 
           // Question 1
-          convo.ask('What did go over during SIG? Are you currently applying \
-what you went over to your project? What strategies did you talk about?',
+          convo.ask('What is currently preventing you from making process on \
+your project? How can you apply your usual strategies to meet your goals to this blocker?',
             (res,convo) => {
               convo.next();
             }, {'key': 'r1_answer1'});
@@ -28,15 +28,14 @@ what you went over to your project? What strategies did you talk about?',
             setInterval(followUp,30*60000); // Not 30 min for some reason
 
           // Question 2
-          convo.ask('What are you currently doing well, and what could you do better?',
+          convo.ask('What about your usual strategies is good, and what about these strategies can be improved?',
             (res,convo) => {
               convo.next();
             }, {'key': 'r1_answer2'});
 
           // Question 3
-          convo.ask('Are you satisfied with your current progress, or do you \
-feel the need to adjust your direction? Explain why, and if you need to make changes, \
-detail what those changes would be.',
+          convo.ask('Are you satisfied with your current progress, or do you feel \
+the need to adjust your direction? Explain why, and if you need to make changes, detail what those changes would be.',
             (res,convo) => {
               convo.say("Thanks for reflecting with me! I've recorded your responses!")
               askTime(res,convo,message);
