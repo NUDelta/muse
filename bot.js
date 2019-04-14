@@ -104,8 +104,9 @@ bot.identity = {
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var server = require(__dirname + '/components/express_webserver.js')(controller);
 var webserver = server[0];
+// Enable interactive buttons
 var slackInteractions = server[1];
-slackInteractions.action('interactive_convo', (payload,respond)=>{
+slackInteractions.action('interactive_convo', (payload,respond) => {
   // `payload` is an object that describes the interaction
   console.log(`The user ${payload.user.name} in team ${payload.team.domain} pressed a button`);
 
@@ -114,7 +115,21 @@ slackInteractions.action('interactive_convo', (payload,respond)=>{
   console.log(payload);
   const reply = payload.original_message;
   delete reply.attachments[0].actions;
-  // return reply;
+  return reply;
+});
+slackInteractions.action('learning_strategies', (payload,respond) => {
+  console.log(payload);
+  var reply = payload.actions[0].name;
+  var options = {
+    token: process.env.oAuthToken,
+    as_user: payload.user.name,
+    channel: payload.channel.id,
+    text: reply
+  }
+  bot.api.chat.postMessage(options, (err,res) => {
+    if (err) console.error(err);
+  });
+  return "You have chosen: " + reply;
 });
 
 if (!process.env.clientId || !process.env.clientSecret) {
