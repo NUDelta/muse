@@ -20,7 +20,7 @@ module.exports = function(controller) {
           }
           setInterval(followUp,30*60000); // Not 30 min for some reason
 
-          convo.ask({"What blocker are you struggling with the most for this sprint?"}, (res,convo) => {
+          convo.ask("What blocker are you struggling with the most for this sprint?", (res,convo) => {
             convo.next();
           }, {'key': 'r1_answer1'});
 
@@ -136,7 +136,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
                 ]
               }
             ]},function(response,convo) {
-            convo.gotoThread('q2')
+            convo.gotoThread('q3')
           },{'key': 'r1_answer2a'},'sprints');
 
           convo.addQuestion({
@@ -164,7 +164,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q2');
+            convo.gotoThread('q3');
           },{'key': 'r1_answer2b'},'docs');
 
           convo.addQuestion({
@@ -192,7 +192,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q2');
+            convo.gotoThread('q3');
           },{'key': 'r1_answer2c'},'communication');
 
           convo.addQuestion({
@@ -234,7 +234,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q2');
+            convo.gotoThread('q3');
           },{'key': 'r1_answer2d'},'help');
 
           convo.addQuestion({

@@ -35,10 +35,9 @@ module.exports = function(controller) {
     webserver.set('views', __dirname + '/../views/');
 
     webserver.use(express.static('public'));
-
     var server = http.createServer(webserver);
 
-    server.listen(process.env.PORT || 3000, null, function() {
+    webserver.listen(process.env.PORT || 3000, null, function() {
 
         console.log('Express webserver configured and listening at http://localhost:' + process.env.PORT || 3000);
 

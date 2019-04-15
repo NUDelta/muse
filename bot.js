@@ -158,6 +158,37 @@ if (!process.env.clientId || !process.env.clientSecret) {
       layout: 'layouts/default'
     });
   })
+
+  webserver.post('/login', (req,res) => {
+    var username = req.body.username;
+    async function getUserId() {
+      let id = await bot.api.users.info({
+        token: process.env.oAuthToken,
+        user: username
+      }, (err,res) => {
+        if (err) console.error(err);
+        if (!err) {
+          return res.user.id;
+        }
+      });
+      return id;
+    }
+    let id = getUserId();
+    if (id) {
+      controller.storage.users.get(id, (err,user_data) => {
+        if (err) {
+          // Reroute to a login error page, user probably has no data to show
+          res.redirect('/login_error');
+          console.error(err);
+        }
+        else {
+          // Reroute to dashboard and send user data to view
+          res.render('/home', {data: user_data});
+        }
+      });
+    }
+
+  });
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
   require(__dirname + '/components/user_registration.js')(controller);

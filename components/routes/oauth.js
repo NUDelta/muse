@@ -4,7 +4,7 @@ module.exports = function(webserver, controller) {
 
     var handler = {
         login: function(req, res) {
-            res.redirect(controller.getAuthorizeURL()); // TODO: Include team ID and redirect param
+            res.redirect(controller.getAuthorizeURL());
         },
         oauth: function(req, res) {
             var code = req.query.code;
