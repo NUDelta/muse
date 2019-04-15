@@ -129,7 +129,7 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
   bot.api.chat.postMessage(options, (err,res) => {
     if (err) console.error(err);
   });
-  return "You have chosen: " + reply;
+  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
 });
 
 if (!process.env.clientId || !process.env.clientSecret) {
