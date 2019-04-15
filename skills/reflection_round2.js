@@ -78,35 +78,41 @@ session? Did you feel the need to make any changes to your process? Why or why n
           }, {'key': 'r2_answer3'});
 
           // Question 4
-          controller.storage.users.get(message.user, (err, user_data) => {
-            if (!Array.isArray(user_data)) {
-              user_data = [user_data];
-            }
-            var round2_docs = user_data.filter((o) => { return o.round == 2; });
-            if (round2_docs.length > 0) {
-              var get_most_recent_doc = function(array, t) {
-                let res = array.map((o) => {
-                  let d = new Date(o.time);
-                  if (d.getTime() == t) {
-                    return o;
-                  }
-                });
-                if (res.length > 0) {
-                  return res[0];
-                }
-              }
-              let most_recent_time = Math.max.apply(Math, round2_docs.map((o) => { return new Date(o.time); }));
-              let most_recent = get_most_recent_doc(round2_docs, most_recent_time);
-              let res = most_recent.r2_answer3;
-              convo.say("Last week, you described the pros and cons of your process: " + res);
-              convo.next();
-              convo.ask("How have you grown since them in terms of the ways in which you work?",
-              (res,convo) => {
-                convo.next();
-              }, {'key': 'r2_answer4'});
-            }
+          convo.ask("Open up the muse app at https://muse-delta.herokuapp.com/ and take a look at your reflection history. How have you grown since then in terms of the ways in which you work?",
+          (res,convo) => {
+            convo.next();
+          }, {'key': 'r2_answer4'});
 
-          });
+          // Not sure if I'll include this yet
+          // controller.storage.users.get(message.user, (err, user_data) => {
+          //   if (!Array.isArray(user_data)) {
+          //     user_data = [user_data];
+          //   }
+          //   var round2_docs = user_data.filter((o) => { return o.round == 2; });
+          //   if (round2_docs.length > 0) {
+          //     var get_most_recent_doc = function(array, t) {
+          //       let res = array.map((o) => {
+          //         let d = new Date(o.time);
+          //         if (d.getTime() == t) {
+          //           return o;
+          //         }
+          //       });
+          //       if (res.length > 0) {
+          //         return res[0];
+          //       }
+          //     }
+          //     let most_recent_time = Math.max.apply(Math, round2_docs.map((o) => { return new Date(o.time); }));
+          //     let most_recent = get_most_recent_doc(round2_docs, most_recent_time);
+          //     let res = most_recent.r2_answer3;
+          //     convo.say("Last week, you described the pros and cons of your process: " + res);
+          //     convo.next();
+          //     convo.ask("How have you grown since them in terms of the ways in which you work?",
+          //     (res,convo) => {
+          //       convo.next();
+          //     }, {'key': 'r2_answer4'});
+          //   }
+          //
+          // });
 
           convo.say("Thanks for reflecting with me! I've recorded your responses!");
           askTime(res,convo,message);

@@ -20,11 +20,14 @@ module.exports = function(controller) {
           }
           setInterval(followUp,30*60000); // Not 30 min for some reason
 
-          // Question 1
+          convo.ask({"What blocker are you struggling with the most for this sprint?"}, (res,convo) => {
+            convo.next();
+          }, {'key': 'r1_answer1'});
+
           convo.ask({
             attachments: [
               {
-                title: "Choose a category you would like to focus on for this week. Which strategy out of the category below would you like to work towards improving?",
+                title: "Select the category that will help you overcome your blocker for this sprint.",
                 callback_id: "learning_strategies",
                 attachment_type: 'default',
                 actions: [
@@ -92,7 +95,7 @@ module.exports = function(controller) {
                 convo.gotoThread('growth');
               }
             }
-          ], {'key': 'r1_answer1'});
+          ], {'key': 'r1_answer2'});
 
           convo.addQuestion({
             attachments:[
@@ -134,7 +137,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]},function(response,convo) {
             convo.gotoThread('q2')
-          },{'key': 'r1_answer1a'},'sprints');
+          },{'key': 'r1_answer2a'},'sprints');
 
           convo.addQuestion({
             attachments: [
@@ -162,7 +165,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q2');
-          },{'key': 'r1_answer1a'},'docs');
+          },{'key': 'r1_answer2b'},'docs');
 
           convo.addQuestion({
             attachments: [
@@ -190,7 +193,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q2');
-          },{'key': 'r1_answer1a'},'communication');
+          },{'key': 'r1_answer2c'},'communication');
 
           convo.addQuestion({
             attachments: [
@@ -232,7 +235,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q2');
-          },{'key': 'r1_answer1a'},'help');
+          },{'key': 'r1_answer2d'},'help');
 
           convo.addQuestion({
             attachments: [
@@ -280,27 +283,25 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             }
           ]
           },function(response,convo) {
-            convo.gotoThread('q2')
-          },{'key': 'r1_answer1a'},'growth');
+            convo.gotoThread('q3')
+          },{'key': 'r1_answer2e'},'growth');
 
         convo.addQuestion('How will working on this strategy help you accomplish your goals?',function(response,convo) {
-          convo.gotoThread('q3');
-        },{'key': 'r1_answer2'},'q2');
+          convo.gotoThread('q4');
+        },{'key': 'r1_answer3'},'q3');
 
         convo.addQuestion('Are you satisfied with your current progress, or do you feel \
 the need to adjust your direction? Explain why, and if you need to make changes, detail what those changes would be.',
           (res,convo) => {
             convo.gotoThread('askTime');
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
-          }, {'key': 'r1_answer3'}, 'q3');
+          }, {'key': 'r1_answer3'}, 'q4');
 
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
             verifyTime(res,convo,message);
             convo.next();
-            // might have to end conversation differently
           }, {'key': 'next_time'}, 'askTime');
-
 
         var verifyTime = (res,convo,message) => {
           const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
