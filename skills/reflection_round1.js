@@ -318,7 +318,7 @@ the need to adjust your direction? Explain why, and if you need to make changes,
 
               bot.api.reminders.add({
                 token: process.env.oAuthToken,
-                text: "Start reflection round 2 with <@muse>!",
+                text: "Start reflection round 2 with <@muse>! Message `reflection round 2` to get started.",
                 time: res.text,
                 user: message.user
               }, (err,res) => {

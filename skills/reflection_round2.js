@@ -141,7 +141,7 @@ session? Did you feel the need to make any changes to your process? Why or why n
 
                 bot.api.reminders.add({
                   token: process.env.oAuthToken,
-                  text: "Start reflection round 2 with <@muse>!",
+                  text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
                   time: res.text,
                   user: message.user
                 }, (err,res) => {
