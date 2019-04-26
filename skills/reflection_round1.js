@@ -324,18 +324,33 @@ the need to adjust your direction? Explain why, and if you need to make changes,
               }, (err,res) => {
                 if (err) {
                   convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
-                  askTime(res,convo,message);
+                  convo.next();
+                  convo.ask("When can I ping you again to complete the second round of reflection questions?",
+                  (res3,convo) => {
+                    convo.next();
+                    verifyTime(res3,convo,message);
+                  });
                 }
               });
               convo.next();
             }
-            else if (no.includes(res.text.toLowerCase())) {
-              askTime(res,convo,message);
+            else if (no.includes(res2.text.toLowerCase())) {
+              console.log("user replied no");
               convo.next();
+              convo.ask("When can I ping you again to complete the second round of reflection questions?",
+              (res3,convo) => {
+                convo.next();
+                verifyTime(res3,convo,message);
+              });
             }
             else {
               convo.say("Sorry, I didn't understand that.");
-              askTime(res,convo,message);
+              convo.next();
+              convo.ask("When can I ping you again to complete the second round of reflection questions?",
+              (res3,convo) => {
+                convo.next();
+                verifyTime(res3,convo,message);
+              });
             }
           }, {});
         }

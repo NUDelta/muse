@@ -13,7 +13,7 @@ var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
     clientSigningSecret: process.env.clientSigningSecret,
-    debug: true,
+    // debug: true,
     scopes: ['bot']
 };
 
