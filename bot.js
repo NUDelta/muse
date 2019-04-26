@@ -7,6 +7,7 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
+var MongoClient = require('mogodb').MongoClient;
 
 var bot_options = {
     clientId: process.env.clientId,
@@ -137,21 +138,22 @@ if (!process.env.clientId || !process.env.clientSecret) {
   // Load in some helpers that make running Botkit on Glitch.com better
   require(__dirname + '/components/plugin_glitch.js')(controller);
 
-  webserver.get('/', function(req, res){
-    res.render('installation', {
-      domain: req.get('host'),
-      protocol: req.protocol,
-      glitch_domain:  process.env.PROJECT_DOMAIN,
-      layout: 'layouts/default'
-    });
-  })
+  // webserver.get('/', function(req, res){
+  //   res.render('installation', {
+  //     domain: req.get('host'),
+  //     protocol: req.protocol,
+  //     glitch_domain:  process.env.PROJECT_DOMAIN,
+  //     layout: 'layouts/default'
+  //   });
+  // })
 
   var where_its_at = 'http://' + (process.env.PROJECT_DOMAIN ? process.env.PROJECT_DOMAIN+ '.glitch.me/' : 'localhost:' + process.env.PORT || 3000);
   console.log('WARNING: This application is not fully configured to work with Slack. Please see instructions at ' + where_its_at);
 }else {
 
   webserver.get('/', function(req, res){
-    res.render('index', {
+
+    res.render('index', { // TODO: Write to Mongo
       domain: req.get('host'),
       protocol: req.protocol,
       glitch_domain:  process.env.PROJECT_DOMAIN,
@@ -159,36 +161,36 @@ if (!process.env.clientId || !process.env.clientSecret) {
     });
   })
 
-  webserver.post('/login', (req,res) => {
-    var username = req.body.username;
-    async function getUserId() {
-      let id = await bot.api.users.info({
-        token: process.env.oAuthToken,
-        user: username
-      }, (err,res) => {
-        if (err) console.error(err);
-        if (!err) {
-          return res.user.id;
-        }
-      });
-      return id;
-    }
-    let id = getUserId();
-    if (id) {
-      controller.storage.users.get(id, (err,user_data) => {
-        if (err) {
-          // Reroute to a login error page, user probably has no data to show
-          res.redirect('/login_error');
-          console.error(err);
-        }
-        else {
-          // Reroute to dashboard and send user data to view
-          res.render('/home', {data: user_data});
-        }
-      });
-    }
-
-  });
+  // webserver.post('/login', (req,res) => {
+  //   var username = req.body.username;
+  //   async function getUserId() {
+  //     let id = await bot.api.users.info({
+  //       token: process.env.oAuthToken,
+  //       user: username
+  //     }, (err,res) => {
+  //       if (err) console.error(err);
+  //       if (!err) {
+  //         return res.user.id;
+  //       }
+  //     });
+  //     return id;
+  //   }
+  //   let id = getUserId();
+  //   if (id) {
+  //     controller.storage.users.get(id, (err,user_data) => {
+  //       if (err) {
+  //         // Reroute to a login error page, user probably has no data to show
+  //         res.redirect('/login_error');
+  //         console.error(err);
+  //       }
+  //       else {
+  //         // Reroute to dashboard and send user data to view
+  //         res.render('/home', {data: user_data});
+  //       }
+  //     });
+  //   }
+  //
+  // });
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
   require(__dirname + '/components/user_registration.js')(controller);
