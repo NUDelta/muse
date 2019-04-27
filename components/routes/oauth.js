@@ -1,10 +1,17 @@
 var debug = require('debug')('botkit:oauth');
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+var request = require('request');
+
+env(path.join(__dirname, '../../', '.env'));
+if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+  usage_tip();
+}
 
 module.exports = function(webserver, controller) {
-
     var handler = {
         login: function(req, res) {
-            res.redirect(controller.getAuthorizeURL());
+            var slackApi="https://slack.com/oauth/authorize?&client_id="+process.env.clientId+"&scope=users:read";
+            res.redirect(slackApi);
         },
         oauth: function(req, res) {
             var code = req.query.code;
@@ -14,18 +21,19 @@ module.exports = function(webserver, controller) {
             var slackapi = controller.spawn({});
 
             var opts = {
-                client_id: controller.config.clientId,
-                client_secret: controller.config.clientSecret,
-                code: code
+                client_id: process.env.clientId,
+                client_secret: process.env.clientSecret,
+                clientSigningSecret: process.env.clientSigningSecret,
+                code: req.query.code
             };
 
             slackapi.api.oauth.access(opts, function(err, auth) {
 
                 if (err) {
+                    console.error(err);
                     debug('Error confirming oauth', err);
                     return res.redirect('/login_error.html');
                 }
-
                 // what scopes did we get approved for?
                 var scopes = auth.scope.split(/\,/);
 
@@ -52,8 +60,26 @@ module.exports = function(webserver, controller) {
                     controller.trigger('oauth:success', [auth]);
 
                     res.cookie('team_id', auth.team_id);
-                    res.cookie('bot_user_id', auth.bot.bot_user_id);
-                    res.redirect('/login_success.html');
+                    res.cookie('user_id', auth.user_id);
+
+                    async function getUserData(userId) {
+                      let res = await controller.storage.users.get(userId, (err, user_data) => {
+                        return user_data;
+                      });
+                      return res;
+                    }
+
+                    try {
+                      var data = getUserData(userData);
+                      res.render('home', {
+                        data: data,
+                        layout: 'layouts/default'
+                      });
+                    }
+                    catch (err) {
+                      console.error(err);
+                      return res.redirect('/login_error.html');
+                    }
 
                 });
 
@@ -74,7 +100,7 @@ module.exports = function(webserver, controller) {
     // So in Slack's config, under oauth redirect urls,
     // your value should be https://<my custom domain or IP>/oauth
     debug('Configured /oauth url');
-    webserver.get('/oauth', handler.oauth);
+    webserver.get('/auth', handler.oauth);
 
     return handler;
 }

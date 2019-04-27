@@ -20,14 +20,15 @@ module.exports = function(controller) {
           }
           setInterval(followUp,30*60000); // Not 30 min for some reason
 
-          convo.ask("What blocker are you struggling with the most for this sprint?", (res,convo) => {
+          convo.ask("What blocker are you currently struggling with? How will the story that you are currently working on help you overcome this blocker and make progress towards your goals?",
+          (res,convo) => {
             convo.next();
           }, {'key': 'r1_answer1'});
 
           convo.ask({
             attachments: [
               {
-                title: "Select the category that will help you overcome your blocker for this sprint.",
+                title: "Select the learning strategy category that will help you overcome your blocker for this sprint.",
                 callback_id: "learning_strategies",
                 attachment_type: 'default',
                 actions: [
@@ -100,10 +101,10 @@ module.exports = function(controller) {
           convo.addQuestion({
             attachments:[
               {
-                title: 'Choose a category you would like to focus on for this week. Which strategy out of the category below would you like to work towards improving?\n \
-1. I will think carefully about the goals for the next sprint and wrote down stories and tasks that best promote progress-making on my project.\n\
+                title: 'Out of the strategies below, which would you like to work towards improving?\n \
+1. I will think carefully about the goals for the next sprint and will write down stories and tasks that best promote progress-making on my project.\n\
 2. I will prioritize working on high-valued stories over lower-valued stories to ensure that I achieve significant deliverables by the end of each sprint.\n\
-3. I will update my sprint plan throughout a sprint to record progress/hours and made edits to my plan as necessary, and not just last minute before a SIG meeting.\n\
+3. I will update my sprint plan throughout a sprint to record progress/hours and will make edits to my plan as necessary, and not just last minute before a SIG meeting.\n\
 4. I will respect the points/time constraints inherent \
 in each sprint and will not "overcrank" to attempt to get things done and instead will log my progress and just backlog incomplete stories and tasks.',
                 callback_id: 'learning_strategies',
@@ -144,7 +145,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               {
                 title: "Choose a category you would like to focus on for this week. Which strategy out of the category below would you like to work towards improving?\n\
 1. I will actively update my canvases to reflect my work and understanding about my research.\n\
-2. I have will update our design log so that it is readable and that it has quick links to key parts of our work this quarter.",
+2. I will update our design log so that it is readable and that it has quick links to key parts of our work this quarter.",
                 callback_id: "learning_strategies",
                 attachment_type: 'default',
                 actions: [
@@ -199,8 +200,8 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             attachments: [
               {
                 title: "Choose a category you would like to focus on for this week. Which strategy out of the category below would you like to work towards improving?\n\
-1. When I encountered blockers, I actively sought out help from other students in DTR over chat or in-person, before I have invested too much of my sprint in a blocker.\n\
-2. When I encountered blockers, I actively sought out help from my mentors in DTR over chat or in-person, before I have invested too much of my sprint in a blocker.\n\
+1. When I encounter blockers, I will actively seek out help from other students in DTR over chat or in-person, before I invest too much of my sprint in a blocker.\n\
+2. When I encounter blockers, I will actively seek out help from my mentors in DTR over chat or in-person, before I invest too much of my sprint in a blocker.\n\
 3. I will attempt to make efficient use of the time of people who help me (e.g. by doing what I can to prepare, or putting in some effort to resolve the problem).\n\
 4. I will make time to help others in DTR (who are not on my project) outside of class time.",
                 callback_id: "learning_strategies",
@@ -241,11 +242,11 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             attachments: [
             {
               title: "Choose a category you would like to focus on for this week. Which strategy out of the category below would you like to work towards improving?\n\
-    1. I consistently worked to identify where to go next and how to get there.\n\
-    2. I had a strong will to achieve goals identified by me and my mentors.\n\
-    3. I avoided distractions and focused on the most important tasks at hand.\n\
-    4. I embraced challenges and viewed failures and setbacks as learning opportunities.\n\
-    5. I embraced the opportunity to learn and do things that were out of my comfort zone.",
+    1. I will consistently work to identify where to go next and how to get there.\n\
+    2. I will have a strong will to achieve goals identified by me and my mentors.\n\
+    3. I will avoid distractions and will focus on the most important tasks at hand.\n\
+    4. I will embrace challenges and will view failures and setbacks as learning opportunities.\n\
+    5. I will embrace the opportunity to learn and do things that may be out of my comfort zone.",
               callback_id: "learning_strategies",
               attachment_type: 'default',
               actions: [
@@ -306,7 +307,7 @@ the need to adjust your direction? Explain why, and if you need to make changes,
         var verifyTime = (res,convo,message) => {
           const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
           const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
-          convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text}. Is that ok?`,(res2,convo) => {
+          convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
             if (yes.includes(res2.text.toLowerCase())) {
               console.log("user replied yes");
               convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
@@ -387,7 +388,6 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             }
             catch (err) {
               console.error(err);
-              console.log(res);
               controller.storage.users.save(res);
             }
           }

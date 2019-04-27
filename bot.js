@@ -1,4 +1,5 @@
 var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+var monk = require('monk');
 
 env(__dirname + '/.env');
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
@@ -7,7 +8,7 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
-var MongoClient = require('mogodb').MongoClient;
+var MongoClient = require('mongodb').MongoClient;
 
 var bot_options = {
     clientId: process.env.clientId,
@@ -19,10 +20,40 @@ var bot_options = {
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
 // Mongo is automatically configured when deploying to Heroku
+function getStorage(db, zone) {
+    var table = db.get(zone);
+
+    return {
+      get: function(id, cb) {
+        return table.find({id: id}, cb);
+      },
+      getOne: function(id, cb) {
+        return table.find({id: id}, cb);
+      },
+      save: function(data, cb) {
+        console.log("inserting doc...");
+        return table.insert(data, cb);
+      },
+      delete: function(id, cb) {
+        return table.delete(id, cb);
+      },
+      all: function(cb) {
+        return table.all(objectsToList(cb));
+      }
+    }
+}
+
 if (process.env.MONGO_URI) {
-    var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
-    console.log("writing to mongo");
-    bot_options.storage = mongoStorage;
+    var db = monk(process.env.MONGO_URI);
+    db.catch((err) => {
+      throw new Error(err);
+    });
+    var storage = {};
+    var tables = ["users", "sprints", "tasks", "teams", "channels"]
+    tables.forEach((zone) => {
+      storage[zone] = getStorage(db, zone);
+    })
+    bot_options.storage = storage;
 } else {
     bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
@@ -152,45 +183,14 @@ if (!process.env.clientId || !process.env.clientSecret) {
 }else {
 
   webserver.get('/', function(req, res){
-
     res.render('index', { // TODO: Write to Mongo
       domain: req.get('host'),
       protocol: req.protocol,
       glitch_domain:  process.env.PROJECT_DOMAIN,
       layout: 'layouts/default'
     });
-  })
+  });
 
-  // webserver.post('/login', (req,res) => {
-  //   var username = req.body.username;
-  //   async function getUserId() {
-  //     let id = await bot.api.users.info({
-  //       token: process.env.oAuthToken,
-  //       user: username
-  //     }, (err,res) => {
-  //       if (err) console.error(err);
-  //       if (!err) {
-  //         return res.user.id;
-  //       }
-  //     });
-  //     return id;
-  //   }
-  //   let id = getUserId();
-  //   if (id) {
-  //     controller.storage.users.get(id, (err,user_data) => {
-  //       if (err) {
-  //         // Reroute to a login error page, user probably has no data to show
-  //         res.redirect('/login_error');
-  //         console.error(err);
-  //       }
-  //       else {
-  //         // Reroute to dashboard and send user data to view
-  //         res.render('/home', {data: user_data});
-  //       }
-  //     });
-  //   }
-  //
-  // });
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
   require(__dirname + '/components/user_registration.js')(controller);
