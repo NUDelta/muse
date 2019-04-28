@@ -62,18 +62,31 @@ module.exports = function(webserver, controller) {
                     res.cookie('team_id', auth.team_id);
                     res.cookie('user_id', auth.user_id);
 
-                    async function getUserData(userId) {
-                      let res = await controller.storage.users.get(userId, (err, user_data) => {
-                        return user_data;
+                    async function getUserData(userId,res) {
+                      return res = await controller.storage.users.get(userId, (err, user_data) => {
+                        console.log(user_data);
+                        return [user_data,res];
                       });
-                      return res;
+                    }
+
+                    function renderHome(data) {
+                      console.log("rendering home");
+                      res.render('home', {
+                        data: data,
+                        layout: '../views/layouts/default'
+                      });
                     }
 
                     try {
-                      var data = getUserData(userData);
-                      res.render('home', {
-                        data: data,
-                        layout: 'layouts/default'
+                      var data = getUserData(auth.user_id).then((data) => {
+                        if (data[0] == null) {
+                          return res.redirect('/login_error.html');
+                        }
+                        // if there are no reflections re-route to a no reflections static page
+                        renderHome(data[0].r1_answer1,data[1]); // Get a list of reflections
+                      }).catch((err) => {
+                        console.error(err);
+                        return res.redirect('/login_error.html');
                       });
                     }
                     catch (err) {
@@ -82,8 +95,6 @@ module.exports = function(webserver, controller) {
                     }
 
                 });
-
-
             });
         }
     }
