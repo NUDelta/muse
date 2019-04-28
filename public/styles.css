@@ -85,3 +85,40 @@ a.button {
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1); }
 
 /*# sourceMappingURL=styles.css.map */
+
+.history {
+  display: block;
+  padding: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+  @media (min-width: 576px) .history {
+    padding: 1.5rem;
+    margin-right: 0;
+    margin-left: 0;
+    border-width: .2rem;
+  }
+
+}
+
+div.card-header > h3 {
+  font-size: 1rem;
+}
+
+div.card-body > h3 {
+  font-size: 1rem;
+}
+
+div.card-body > p{
+  margin-bottom: 0;
+  font-size: 0.75rem;
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.card {
+  margin-bottom: 2.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+}

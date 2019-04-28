@@ -64,26 +64,52 @@ module.exports = function(webserver, controller) {
 
                     async function getUserData(userId,res) {
                       return res = await controller.storage.users.get(userId, (err, user_data) => {
-                        console.log(user_data);
                         return [user_data,res];
                       });
                     }
 
                     function renderHome(data) {
                       console.log("rendering home");
+                      data = data.sort((a,b) => {
+                        a = new Date(a.time);
+                        b = new Date(b.time);
+                        return a>b ? -1 : a<b ? 1 : 0;
+                      })
+                      data = data.map(obj => {
+                        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        var pm = false;
+                        var time = new Date(obj.time);
+                        var hours = time.getHours();
+                        var min = time.getMinutes();
+                        if (hours > 11) {
+                          hours = hours - 12;
+                          pm = true;
+                        }
+                        if (hours == 0) hours = 12;
+                        if (min.length == 1) min = '0' + min;
+                        var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
+                        obj.time = newTime;
+                        return obj;
+                      });
+                      var user = data[0].userRealName.split(' ')[0];
+                      // Convert timestamp to readable format
                       res.render('home', {
                         data: data,
+                        user: user,
                         layout: '../views/layouts/default'
                       });
                     }
 
                     try {
                       var data = getUserData(auth.user_id).then((data) => {
-                        if (data[0] == null) {
+                        if (typeof data === 'undefined') {
                           return res.redirect('/login_error.html');
                         }
+                        if (data.length === 0) {
+                          return res.redirect('no_data.html');
+                        }
                         // if there are no reflections re-route to a no reflections static page
-                        renderHome(data[0].r1_answer1,data[1]); // Get a list of reflections
+                        renderHome(data); // Get a list of reflections
                       }).catch((err) => {
                         console.error(err);
                         return res.redirect('/login_error.html');

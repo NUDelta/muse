@@ -8,7 +8,6 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
-var MongoClient = require('mongodb').MongoClient;
 
 var bot_options = {
     clientId: process.env.clientId,
@@ -164,32 +163,14 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
   // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
 });
 
-if (!process.env.clientId || !process.env.clientSecret) {
-
-  // Load in some helpers that make running Botkit on Glitch.com better
-  require(__dirname + '/components/plugin_glitch.js')(controller);
-
-  // webserver.get('/', function(req, res){
-  //   res.render('installation', {
-  //     domain: req.get('host'),
-  //     protocol: req.protocol,
-  //     glitch_domain:  process.env.PROJECT_DOMAIN,
-  //     layout: 'layouts/default'
-  //   });
-  // })
-
-  var where_its_at = 'http://' + (process.env.PROJECT_DOMAIN ? process.env.PROJECT_DOMAIN+ '.glitch.me/' : 'localhost:' + process.env.PORT || 3000);
-  console.log('WARNING: This application is not fully configured to work with Slack. Please see instructions at ' + where_its_at);
-}else {
-
-  webserver.get('/', function(req, res){
-    res.render('index', { // TODO: Write to Mongo
-      domain: req.get('host'),
-      protocol: req.protocol,
-      glitch_domain:  process.env.PROJECT_DOMAIN,
-      layout: 'layouts/default'
-    });
+webserver.get('/', function(req, res){
+  res.render('index', { // TODO: Write to Mongo
+    domain: req.get('host'),
+    protocol: req.protocol,
+    glitch_domain:  process.env.PROJECT_DOMAIN,
+    layout: 'layouts/default'
   });
+});
 
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
@@ -205,7 +186,6 @@ if (!process.env.clientId || !process.env.clientSecret) {
   require("fs").readdirSync(normalizedPath).forEach(function(file) {
     require("./skills/" + file)(controller);
   });
-}
 
 controller.hears(
   ['hello', 'hi', 'greetings'], [
