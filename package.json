@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@slack/client": "^4.8.0",
+    "@slack/interactive-messages": "^1.1.1",
     "body-parser": "^1.15.2",
     "botkit": "^0.7.0",
     "botkit-storage-mongo": "^1.0.6",
@@ -17,10 +18,11 @@
     "express": "^4.14.0",
     "express-hbs": "^1.0.4",
     "mongodb": "^3.2.3",
+    "monk": "^6.0.6",
     "node-env-file": "^0.1.8",
     "npm": "^6.6.0",
     "querystring": "^0.2.0",
-    "request": "^2.79.0",
+    "request": "^2.88.0",
     "wordfilter": "^0.2.6"
   },
   "devDependencies": {},

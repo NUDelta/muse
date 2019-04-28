@@ -28,21 +28,95 @@ session? Did you feel the need to make any changes to your process? Why or why n
           }, {'key': 'r2_answer1'});
 
           // Question 2
-          convo.ask("Describe what you thought was effective or ineffective \
-about your process. Highlight which of the following metacognitive strategies you \
-applied in the learning strategies checklist.",
-          (res,convo) => {
+          controller.storage.users.get(message.user, (err, user_data) => {
+            if (!Array.isArray(user_data)) {
+              user_data = [user_data];
+            }
+            var round1_docs = user_data.filter((o) => { return o.round == 1; });
+            if (round1_docs.length > 0) {
+              var get_most_recent_doc = function(array, t) {
+                let res = array.map((o) => {
+                  let d = new Date(o.time);
+                  if (d.getTime() == t) {
+                    return o;
+                  }
+                });
+                if (res.length > 0) {
+                  return res[0];
+                }
+              }
+
+            let most_recent_time = Math.max.apply(Math, round1_docs.map((o) => { return new Date(o.time); }));
+            let most_recent = get_most_recent_doc(round1_docs, most_recent_time);
+            let res = most_recent.r1_answer1;
+            convo.say("In your previous reflection session, you mentioned that you could improve at: " + res);
             convo.next();
-          }, {'key': 'r2_answer2'});
+            convo.ask("How have you made progress towards improving that learning strategy?",
+            (res,convo) => {
+              convo.next();
+            }, {'key': 'r2_answer2'});
+
+            // let filtered_array = round1_docs.filter((o) => { return o != most_recent; });
+            // if (filtered_array.length > 0) {
+            //   var previous_time = Math.max.apply(Math, filtered_array.map((o) => { return new Date(o.time); }));
+            //   var prev_most_recent = get_most_recent_doc(filtered_array, previous_time);
+            //   var res2 = prev_most_recent.r1_answer2;
+            //   convo.say("In your previous reflection session, you mentioned the pros and cons of your usual strategies: " + res1);
+            //   convo.next();
+            //   convo.ask("How does this compare to what you mentioned earlier in round 1: " + res2 + "\n Can you see any improvements in the way you work?",
+            //   (res,convo) => {
+            //     convo.next();
+            //   }, {'key': 'r2_answer2a'});
+            // }
+            }
+          });
 
           // Question 3
-          convo.ask("Describe how applying one of the strategies from the learning strategies \
-checklist helped you.",
+          convo.ask("What have you been doing well, and what could be improved?",
           (res,convo) => {
-            convo.say("Thanks for reflecting with me! I've recorded your responses!");
-            askTime(res,convo,message);
             convo.next();
           }, {'key': 'r2_answer3'});
+
+          // Question 4
+          convo.ask("Open up the muse app at https://muse-delta.herokuapp.com/ and take a look at your reflection history. How have you grown since then in terms of the ways in which you work?",
+          (res,convo) => {
+            convo.next();
+          }, {'key': 'r2_answer4'});
+
+          // Not sure if I'll include this yet
+          // controller.storage.users.get(message.user, (err, user_data) => {
+          //   if (!Array.isArray(user_data)) {
+          //     user_data = [user_data];
+          //   }
+          //   var round2_docs = user_data.filter((o) => { return o.round == 2; });
+          //   if (round2_docs.length > 0) {
+          //     var get_most_recent_doc = function(array, t) {
+          //       let res = array.map((o) => {
+          //         let d = new Date(o.time);
+          //         if (d.getTime() == t) {
+          //           return o;
+          //         }
+          //       });
+          //       if (res.length > 0) {
+          //         return res[0];
+          //       }
+          //     }
+          //     let most_recent_time = Math.max.apply(Math, round2_docs.map((o) => { return new Date(o.time); }));
+          //     let most_recent = get_most_recent_doc(round2_docs, most_recent_time);
+          //     let res = most_recent.r2_answer3;
+          //     convo.say("Last week, you described the pros and cons of your process: " + res);
+          //     convo.next();
+          //     convo.ask("How have you grown since them in terms of the ways in which you work?",
+          //     (res,convo) => {
+          //       convo.next();
+          //     }, {'key': 'r2_answer4'});
+          //   }
+          //
+          // });
+
+          convo.say("Thanks for reflecting with me! I've recorded your responses!");
+          askTime(res,convo,message);
+          convo.next();
 
           var askTime = (res,convo,message) => {
             convo.ask("When can I ping you to reflect again?",
@@ -67,7 +141,7 @@ checklist helped you.",
 
                 bot.api.reminders.add({
                   token: process.env.oAuthToken,
-                  text: "Start reflection round 2 with <@muse>!",
+                  text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
                   time: res.text,
                   user: message.user
                 }, (err,res) => {

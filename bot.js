@@ -1,5 +1,5 @@
-// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-var MongoClient = require('mongodb').MongoClient;
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+var monk = require('monk');
 
 env(__dirname + '/.env');
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
@@ -8,20 +8,52 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
+var MongoClient = require('mongodb').MongoClient;
 
 var bot_options = {
     clientId: process.env.clientId,
     clientSecret: process.env.clientSecret,
     clientSigningSecret: process.env.clientSigningSecret,
-    // debug: true,
+    debug: true,
     scopes: ['bot']
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
 // Mongo is automatically configured when deploying to Heroku
+function getStorage(db, zone) {
+    var table = db.get(zone);
+
+    return {
+      get: function(id, cb) {
+        return table.find({id: id}, cb);
+      },
+      getOne: function(id, cb) {
+        return table.find({id: id}, cb);
+      },
+      save: function(data, cb) {
+        console.log("inserting doc...");
+        return table.insert(data, cb);
+      },
+      delete: function(id, cb) {
+        return table.delete(id, cb);
+      },
+      all: function(cb) {
+        return table.all(objectsToList(cb));
+      }
+    }
+}
+
 if (process.env.MONGO_URI) {
-    var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
-    bot_options.storage = mongoStorage;
+    var db = monk(process.env.MONGO_URI);
+    db.catch((err) => {
+      throw new Error(err);
+    });
+    var storage = {};
+    var tables = ["users", "sprints", "tasks", "teams", "channels"]
+    tables.forEach((zone) => {
+      storage[zone] = getStorage(db, zone);
+    })
+    bot_options.storage = storage;
 } else {
     bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
@@ -52,9 +84,23 @@ controller.on('rtm_close', (bot,err) => {
   start_rtm();
 });
 
+var options = {token: process.env.botToken};
+bot.api.team.info(options, (err,res) => {
+  if (err) {
+    console.error(err);
+  }
+  else {
+    controller.storage.teams.save(res.team);
+  }
+});
+
+bot.identity = {
+  id: process.env.botId,
+  name: process.env.botName
+}
+
 // Get information about all users
 // Should update storage
-// var options = {token: process.env.botToken};
 // // let users;
 // // console.log("calling on bot users");
 // bot.api.users.list(options, (err,res) => {
@@ -88,34 +134,63 @@ controller.on('rtm_close', (bot,err) => {
 // })
 
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
-var webserver = require(__dirname + '/components/express_webserver.js')(controller);
+var server = require(__dirname + '/components/express_webserver.js')(controller);
+var webserver = server[0];
+// Enable interactive buttons
+var slackInteractions = server[1];
+slackInteractions.action('interactive_convo', (payload,respond) => {
+  // `payload` is an object that describes the interaction
+  console.log(`The user ${payload.user.name} in team ${payload.team.domain} pressed a button`);
+
+  //actions: [ { name: 'no', type: 'button', value: 'no' } ]
+  //payload.actions[0].name
+  console.log(payload);
+  const reply = payload.original_message;
+  delete reply.attachments[0].actions;
+  return reply;
+});
+slackInteractions.action('learning_strategies', (payload,respond) => {
+  console.log(payload);
+  var reply = payload.actions[0].name;
+  var options = {
+    token: process.env.oAuthToken,
+    as_user: payload.user.name,
+    channel: payload.channel.id,
+    text: reply
+  }
+  bot.api.chat.postMessage(options, (err,res) => {
+    if (err) console.error(err);
+  });
+  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
+});
 
 if (!process.env.clientId || !process.env.clientSecret) {
 
   // Load in some helpers that make running Botkit on Glitch.com better
   require(__dirname + '/components/plugin_glitch.js')(controller);
 
-  webserver.get('/', function(req, res){
-    res.render('installation', {
-      domain: req.get('host'),
-      protocol: req.protocol,
-      glitch_domain:  process.env.PROJECT_DOMAIN,
-      layout: 'layouts/default'
-    });
-  })
+  // webserver.get('/', function(req, res){
+  //   res.render('installation', {
+  //     domain: req.get('host'),
+  //     protocol: req.protocol,
+  //     glitch_domain:  process.env.PROJECT_DOMAIN,
+  //     layout: 'layouts/default'
+  //   });
+  // })
 
   var where_its_at = 'http://' + (process.env.PROJECT_DOMAIN ? process.env.PROJECT_DOMAIN+ '.glitch.me/' : 'localhost:' + process.env.PORT || 3000);
   console.log('WARNING: This application is not fully configured to work with Slack. Please see instructions at ' + where_its_at);
 }else {
 
   webserver.get('/', function(req, res){
-    res.render('index', {
+    res.render('index', { // TODO: Write to Mongo
       domain: req.get('host'),
       protocol: req.protocol,
       glitch_domain:  process.env.PROJECT_DOMAIN,
       layout: 'layouts/default'
     });
-  })
+  });
+
   // Set up a simple storage backend for keeping a record of customers
   // who sign up for the app via the oauth
   require(__dirname + '/components/user_registration.js')(controller);
@@ -130,20 +205,6 @@ if (!process.env.clientId || !process.env.clientSecret) {
   require("fs").readdirSync(normalizedPath).forEach(function(file) {
     require("./skills/" + file)(controller);
   });
-}
-
-function postToMongo(obj) {
-  if (process.env.MONGO_URI) {
-    MongoClient.connect(uri, (err,db) => {
-      if (err) throw err;
-      var dbo = db.db("muse");
-      dbo.collection("reflections").insertOne(obj, (err,res) => {
-        if (err) throw err;
-        console.log("document inserted");
-        db.close();
-      });
-    });
-  }
 }
 
 controller.hears(
