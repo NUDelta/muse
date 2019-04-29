@@ -210,6 +210,7 @@ webserver.get('/', function(req, res){
     });
   }
   else {
+    res.cookie = user_id; // Set local cookie as well
     try {
       var data = getUserData(user_id).then((data) => {
         if (typeof data === 'undefined') {
