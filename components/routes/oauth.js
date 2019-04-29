@@ -10,7 +10,7 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
 module.exports = function(webserver, controller) {
     var handler = {
         login: function(req, res) {
-            var slackApi="https://slack.com/oauth/authorize?&client_id="+process.env.clientId+"&scope=users:read";
+            var slackApi="https://slack.com/oauth/authorize?&client_id="+process.env.clientId+"&scope=users:read&team="+process.env.teamId;
             res.redirect(slackApi);
         },
         oauth: function(req, res) {
@@ -58,7 +58,7 @@ module.exports = function(webserver, controller) {
 
                     auth.identity = identity;
                     controller.trigger('oauth:success', [auth]);
-
+                    
                     res.cookie('team_id', auth.team_id);
                     res.cookie('user_id', auth.user_id);
 
@@ -69,7 +69,6 @@ module.exports = function(webserver, controller) {
                     }
 
                     function renderHome(data) {
-                      console.log("rendering home");
                       data = data.sort((a,b) => {
                         a = new Date(a.time);
                         b = new Date(b.time);
@@ -93,7 +92,7 @@ module.exports = function(webserver, controller) {
                       });
                       var user = data[0].userRealName.split(' ')[0];
                       // Convert timestamp to readable format
-                      res.render('home', {
+                      return res.render('home', {
                         data: data,
                         user: user,
                         layout: '../views/layouts/default'

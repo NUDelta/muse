@@ -1,61 +1,60 @@
-<div class="wrapper">
-  <nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="/home">Navbar</a>
-  </nav>
-  <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-  </head>
-    <h1>{{user}}'s Reflection History</h1>
-    <body>
-      <div class="container-fluid">
-        <div class="strategies">
-          <h2>Learning Strategy Breakdown</h2>
-          <div class="history">
-            <!-- TODO: Insert chart here with breakdowns -->
-            <canvas id="myChart"></canvas> <!-- Dummy chart to see if it'll work -->
-          </div>
-        </div>
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/home">Navbar</a>
+</nav>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</head>
+  <body>
+    <div class="container-fluid">
+      <h1>{{user}}'s Reflection History</h1>
+      <div class="strategies">
+        <h2>Learning Strategy Breakdown</h2>
         <div class="history">
-          <h2>Past Reflections</h2>
-          <!-- TODO: Make reflections searchable -->
-          {{#each data}}
-          <div class="card">
-            <div class="card-header">
-              <h3>{{time}}</h3>
-            </div>
-            <div class="card-body">
-              <h3>Round: {{round}}</h3>
-              {{#if r1_answer1}}
-                <p>1. {{r1_answer1}}</p>
-              {{/if}}
-              {{#if r1_answer2}}
-              <p>2. {{r2_answer2}}</p>
-              {{/if}}
-              {{#if r1_answer2a}}
-                <p>3. {{r1_answer2a}}</p>
-              {{/if}}
-              {{#if r1_answer2b}}
-                <p>3. {{r1_answer2b}}</p>
-              {{/if}}
-              {{#if r1_answer2c}}
-                <p>3. {{r1_answer2c}}</p>
-              {{/if}}
-              {{#if r1_answer2d}}
-                <p>3. {{r1_answer2d}}</p>
-              {{/if}}
-              {{#if r1_answer2e}}
-                <p>3. {{r1_answer2e}}</p>
-              {{/if}}
-              <p>4. {{r1_answer3}}</p>
-            </div>
-          </div>
-          {{/each}}
+          <!-- TODO: Insert chart here with breakdowns -->
+          <canvas id="myChart"></canvas> <!-- Dummy chart to see if it'll work -->
         </div>
       </div>
+      <div class="history">
+        <h2>Past Reflections</h2>
+        <!-- TODO: Make reflections searchable -->
+        {{#each data}}
+        <div class="card">
+          <div class="card-header">
+            <h3>{{time}}</h3>
+          </div>
+          <div class="card-body">
+            <h3>Round: {{round}}</h3>
+            {{#if r1_answer1}}
+              <p>1. {{r1_answer1}}</p>
+            {{/if}}
+            {{#if r1_answer2}}
+            <p>2. {{r2_answer2}}</p>
+            {{/if}}
+            {{#if r1_answer2a}}
+              <p>3. {{r1_answer2a}}</p>
+            {{/if}}
+            {{#if r1_answer2b}}
+              <p>3. {{r1_answer2b}}</p>
+            {{/if}}
+            {{#if r1_answer2c}}
+              <p>3. {{r1_answer2c}}</p>
+            {{/if}}
+            {{#if r1_answer2d}}
+              <p>3. {{r1_answer2d}}</p>
+            {{/if}}
+            {{#if r1_answer2e}}
+              <p>3. {{r1_answer2e}}</p>
+            {{/if}}
+            <p>4. {{r1_answer3}}</p>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
 
-    </body>
-</div>
+  </body>
+
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');

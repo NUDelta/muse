@@ -30,7 +30,6 @@ function getStorage(db, zone) {
         return table.find({id: id}, cb);
       },
       save: function(data, cb) {
-        console.log("inserting doc...");
         return table.insert(data, cb);
       },
       delete: function(id, cb) {
@@ -163,13 +162,98 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
   // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
 });
 
-webserver.get('/', function(req, res){
-  res.render('index', { // TODO: Write to Mongo
-    domain: req.get('host'),
-    protocol: req.protocol,
-    glitch_domain:  process.env.PROJECT_DOMAIN,
+async function getUserData(userId,res) {
+  return res = await controller.storage.users.get(userId, (err, user_data) => {
+    return [user_data,res];
+  });
+}
+
+function renderHome(data,res) {
+  data = data.sort((a,b) => {
+    a = new Date(a.time);
+    b = new Date(b.time);
+    return a>b ? -1 : a<b ? 1 : 0;
+  })
+  data = data.map(obj => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var pm = false;
+    var time = new Date(obj.time);
+    var hours = time.getHours();
+    var min = time.getMinutes();
+    if (hours > 11) {
+      hours = hours - 12;
+      pm = true;
+    }
+    if (hours == 0) hours = 12;
+    if (min.length == 1) min = '0' + min;
+    var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
+    obj.time = newTime;
+    return obj;
+  });
+  var user = data[0].userRealName.split(' ')[0];
+  // Convert timestamp to readable format
+  return res.render('home', {
+    data: data,
+    user: user,
     layout: 'layouts/default'
   });
+}
+
+webserver.get('/', function(req, res){
+  var user_id = req.universalCookies.get('user_id');
+  if (typeof user_id == 'undefined') {
+    res.render('index', { // TODO: Write to Mongo
+      domain: req.get('host'),
+      protocol: req.protocol,
+      glitch_domain:  process.env.PROJECT_DOMAIN,
+      layout: 'layouts/default'
+    });
+  }
+  else {
+    try {
+      var data = getUserData(user_id).then((data) => {
+        if (typeof data === 'undefined') {
+          return res.redirect('/login_error.html');
+        }
+        if (data.length === 0) {
+          return res.redirect('no_data.html');
+        }
+        // if there are no reflections re-route to a no reflections static page
+        renderHome(data,res); // Get a list of reflections
+      }).catch((err) => {
+        console.error(err);
+        return res.redirect('/login_error.html');
+      });
+    }
+    catch (err) {
+      console.error(err);
+      return res.redirect('/login_error.html');
+    }
+  }
+
+});
+
+webserver.get('/home', function(req,res) {
+  var user_id = req.universalCookies.get('user_id');
+  try {
+    var data = getUserData(user_id).then((data) => {
+      if (typeof data === 'undefined') {
+        return res.redirect('/login_error.html');
+      }
+      if (data.length === 0) {
+        return res.redirect('no_data.html');
+      }
+      // if there are no reflections re-route to a no reflections static page
+      renderHome(data,res); // Get a list of reflections
+    }).catch((err) => {
+      console.error(err);
+      return res.redirect('/login_error.html');
+    });
+  }
+  catch (err) {
+    console.error(err);
+    return res.redirect('/login_error.html');
+  }
 });
 
   // Set up a simple storage backend for keeping a record of customers
