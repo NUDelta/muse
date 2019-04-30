@@ -150,7 +150,7 @@ slackInteractions.action('interactive_convo', (payload,respond) => {
 slackInteractions.action('learning_strategies', (payload,respond) => {
   var reply = payload.actions[0].name;
   var options = {
-    token: process.env.oAuthToken,
+    token: process.env.botToken,
     as_user: payload.user.name,
     channel: payload.channel.id,
     text: reply
@@ -164,7 +164,7 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
 slackInteractions.action('stories', (payload,respond) => {
   var reply = payload.actions[0].selected_options[0].value;
   var options = {
-    token: process.env.oAuthToken,
+    token: process.env.botToken,
     as_user: payload.user.name,
     channel: payload.channel.id,
     text: reply
