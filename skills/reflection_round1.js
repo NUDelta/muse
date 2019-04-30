@@ -20,15 +20,115 @@ module.exports = function(controller) {
           }
           setInterval(followUp,30*60000); // Not 30 min for some reason
 
-          convo.ask("What blocker are you currently struggling with? How will the story that you are currently working on help you overcome this blocker and make progress towards your goals?",
+          convo.ask("What blocker are you currently struggling with? What did you go over during SIG to overcome this blocker?",
           (res,convo) => {
             convo.next();
-          }, {'key': 'r1_answer1'});
+          }, {'key': 'blocker'});
+
+          convo.ask({
+              attachments:[
+                  {
+                      title: 'What story are you currently working on?',
+                      callback_id: 'stories',
+                      attachment_type: 'default',
+                      actions: [
+                        {
+                            "name": "stories",
+                            "text": "Pick a story...",
+                            "type": "select",
+                            "options": [
+                                {
+                                    "text": "design arguments",
+                                    "value": "design arguments"
+                                },
+                                {
+                                    "text": "practical canvas",
+                                    "value": "practical canvas"
+                                },
+                                {
+                                    "text": "research canvas",
+                                    "value": "research canvas"
+                                },
+                                {
+                                    "text": "interface arguments/models",
+                                    "value": "interface arguments/models"
+                                },
+                                {
+                                    "text": "system arguments/models",
+                                    "value": "system arguments/models"
+                                },
+                                {
+                                    "text": "practical contributions",
+                                    "value": "practical contributions"
+                                },
+                                {
+                                    "text": "conceptual contributions",
+                                    "value": "conceputal contributions"
+                                },
+                                {
+                                    "text": "approach tree",
+                                    "value": "approach tree"
+                                },
+                                {
+                                    "text": "study design",
+                                    "value": "study design"
+                                },
+                                {
+                                    "text": "paper writing",
+                                    "value": "paper writing"
+                                },
+                                {
+                                    "text": "URG writing",
+                                    "value": "URG writing"
+                                },
+                                {
+                                    "text": "presenting findings (poster, talk)",
+                                    "value": "presenting findings(poster, talk)"
+                                },
+                                {
+                                    "text": "user testing/takeaways from user testing",
+                                    "value": "user testing/takeaways from user testing"
+                                },
+                                {
+                                    "text": "needfinding",
+                                    "value": "needfinding"
+                                },
+                                {
+                                    "text": "user journey maps",
+                                    "value": "user journey maps"
+                                },
+                                {
+                                    "text": "building tech",
+                                    "value": "building tech"
+                                },
+                                {
+                                    "text": "reading/looking for literature",
+                                    "value": "reading/looking for literature"
+                                },
+                                {
+                                    "text": "storyboarding",
+                                    "value": "storyboarding"
+                                },
+                                {
+                                    "text": "prototyping",
+                                    "value": "prototyping"
+                                }
+                            ]
+                        }
+                      ]
+                  }
+              ]
+          }, (res,convo) => { convo.next() }, {'key': 'story'});
+
+          convo.ask("How will the story that you are currently working on help you overcome this blocker and make progress towards your goals?",
+          (res,convo) => {
+            convo.next();
+          }, {'key': 'story_reason'});
 
           convo.ask({
             attachments: [
               {
-                title: "Select the learning strategy category that will help you overcome your blocker for this sprint.",
+                title: "Select the learning strategy category that will help you overcome your blocker for this sprint. Recall what you went over with your mentors during SIG to choose.",
                 callback_id: "learning_strategies",
                 attachment_type: 'default',
                 actions: [
@@ -96,7 +196,7 @@ module.exports = function(controller) {
                 convo.gotoThread('growth');
               }
             }
-          ], {'key': 'r1_answer2'});
+          ], {'key': 'strategy_category'});
 
           convo.addQuestion({
             attachments:[
@@ -138,7 +238,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]},function(response,convo) {
             convo.gotoThread('q3')
-          },{'key': 'r1_answer2a'},'sprints');
+          },{'key': 'strategy'},'sprints');
 
           convo.addQuestion({
             attachments: [
@@ -166,7 +266,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q3');
-          },{'key': 'r1_answer2b'},'docs');
+          },{'key': 'strategy'},'docs');
 
           convo.addQuestion({
             attachments: [
@@ -194,7 +294,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q3');
-          },{'key': 'r1_answer2c'},'communication');
+          },{'key': 'strategy'},'communication');
 
           convo.addQuestion({
             attachments: [
@@ -236,7 +336,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             ]
           },function(response,convo) {
             convo.gotoThread('q3');
-          },{'key': 'r1_answer2d'},'help');
+          },{'key': 'strategy'},'help');
 
           convo.addQuestion({
             attachments: [
@@ -285,18 +385,18 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
           ]
           },function(response,convo) {
             convo.gotoThread('q3')
-          },{'key': 'r1_answer2e'},'growth');
+          },{'key': 'strategy'},'growth');
 
         convo.addQuestion('How will working on this strategy help you accomplish your goals?',function(response,convo) {
           convo.gotoThread('q4');
-        },{'key': 'r1_answer3'},'q3');
+        },{'key': 'strategy_reason'},'q3');
 
         convo.addQuestion('Are you satisfied with your current progress, or do you feel \
 the need to adjust your direction? Explain why, and if you need to make changes, detail what those changes would be.',
           (res,convo) => {
             convo.gotoThread('askTime');
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
-          }, {'key': 'r1_answer3'}, 'q4');
+          }, {'key': 'recap'}, 'q4');
 
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
@@ -311,11 +411,6 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             if (yes.includes(res2.text.toLowerCase())) {
               console.log("user replied yes");
               convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
-
-              var env = require('node-env-file'); // comment out for Heroku
-              path = require('path');
-              let reqPath = path.join(__dirname, '../.env');
-              env(reqPath);
 
               bot.api.reminders.add({
                 token: process.env.oAuthToken,
@@ -363,11 +458,6 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             res.time = new Date();
             res.round = 1;
             res.id = message.user; // ID is Slack user ID
-
-            var env = require('node-env-file'); // comment out for Heroku
-            path = require('path');
-            let reqPath = path.join(__dirname, '../.env');
-            env(reqPath);
 
             async function getUserName(obj,controller) {
               let response = await bot.api.users.info({
