@@ -169,7 +169,6 @@ async function getUserData(userId,res) {
 }
 
 function getStrategies(data) {
-  const keys = ['r1_answer2a','r1_answer2b','r1_answer2c','r1_answer2d','r1_answer2e'];
   const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
   var round1 = data.filter(obj => obj.round == 1);
   var counts = {};
@@ -180,12 +179,12 @@ function getStrategies(data) {
   var specific_strategies = [];
   var responses = round1.map(obj => {
     Object.keys(obj).forEach((key,index) => {
-      if (key === 'r1_answer2') {
-        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp, also add stories
-        categories.push({response: obj[key], time: obj.time});
+      if (key === 'strategy_category') {
+        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp
+        categories.push({response: obj[key], time: obj.time, story: obj.story});
       }
-      if (keys.indexOf(key) >= 0) {
-        specific_strategies.push({response: obj[key], time: obj.time});
+      if (key === 'strategy') {
+        specific_strategies.push({response: obj[key], time: obj.time, story: obj.story});
       }
     });
   });
