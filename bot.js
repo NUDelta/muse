@@ -168,6 +168,30 @@ async function getUserData(userId,res) {
   });
 }
 
+function getStrategies(data) {
+  const keys = ['r1_answer2a','r1_answer2b','r1_answer2c','r1_answer2d','r1_answer2e'];
+  const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
+  var round1 = data.filter(obj => obj.round == 1);
+  var counts = {};
+  for (var i=0; i<strategies.length; i++) {
+    counts[strategies[i]] = 0;
+  }
+  var categories = [];
+  var specific_strategies = [];
+  var responses = round1.map(obj => {
+    Object.keys(obj).forEach((key,index) => {
+      if (key === 'r1_answer2') {
+        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp, also add stories
+        categories.push({response: obj[key], time: obj.time});
+      }
+      if (keys.indexOf(key) >= 0) {
+        specific_strategies.push({response: obj[key], time: obj.time});
+      }
+    });
+  });
+  return [counts, categories, specific_strategies];
+}
+
 function renderHome(data,res) {
   data = data.sort((a,b) => {
     a = new Date(a.time);
@@ -191,10 +215,12 @@ function renderHome(data,res) {
     return obj;
   });
   var user = data[0].userRealName.split(' ')[0];
-  // Convert timestamp to readable format
+  var strategies = getStrategies(data);
+
   return res.render('home', {
     data: data,
     user: user,
+    strategy_category_counts: JSON.stringify(strategies[0]),
     layout: 'layouts/default'
   });
 }

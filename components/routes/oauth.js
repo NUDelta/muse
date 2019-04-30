@@ -70,7 +70,6 @@ module.exports = function(webserver, controller) {
 
                     // TODO: Check this
                     function getStrategies(data) {
-                      // console.log(data); Only receiving one document
                       const keys = ['r1_answer2a','r1_answer2b','r1_answer2c','r1_answer2d','r1_answer2e'];
                       const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
                       var round1 = data.filter(obj => obj.round == 1);
@@ -83,17 +82,15 @@ module.exports = function(webserver, controller) {
                       var responses = round1.map(obj => {
                         Object.keys(obj).forEach((key,index) => {
                           if (key === 'r1_answer2') {
-                            console.log(key);
                             counts[obj[key]] += 1; // TODO: Specify sprint of timestamp, also add stories
                             categories.push({response: obj[key], time: obj.time});
                           }
                           if (keys.indexOf(key) >= 0) {
-                            console.log(key);
                             specific_strategies.push({response: obj[key], time: obj.time});
                           }
                         });
                       });
-                      return [counts, categories, specific_strategies];
+                      return [counts, categories, specific_strategies]; // category counts, category responses and times, strategy responses and times
                     }
 
                     function renderHome(data) {
@@ -120,14 +117,11 @@ module.exports = function(webserver, controller) {
                       });
                       var user = data[0].userRealName.split(' ')[0];
                       var strategies = getStrategies(data);
-                      console.log("printing strategies");
-                      console.log(strategies[0]);
-                      console.log(strategies[1]);
-                      console.log(strategies[2]);
-                      // Convert timestamp to readable format
+
                       return res.render('home', {
                         data: data,
                         user: user,
+                        strategy_category_counts: JSON.stringify(strategies[0]),
                         layout: '../views/layouts/default'
                       });
                     }

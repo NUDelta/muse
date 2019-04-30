@@ -12,7 +12,7 @@
         <h2>Learning Strategy Breakdown</h2>
         <div class="history">
           <!-- TODO: Insert chart here with breakdowns -->
-          <canvas id="myChart"></canvas> <!-- Dummy chart to see if it'll work -->
+          <canvas id="myChart" strategy_category_counts={{strategy_category_counts}} strategy_categories={{strategy_categories}}></canvas> <!-- Dummy chart to see if it'll work -->
         </div>
       </div>
       <div class="history">
@@ -57,19 +57,28 @@
 
 
 <script>
+  String.prototype.replaceAll = function(str1, str2, ignore)
+  {
+    return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
+  }
   var ctx = document.getElementById('myChart').getContext('2d');
+  var strategy_category_counts = "{{strategy_category_counts}}";
+  var scc = JSON.parse(strategy_category_counts.replaceAll('&quot;','"'));
+  // strategy_category_counts = JSON.parse(strategy_category_counts);
+  var category_labels = Object.keys(scc);
+  var category_values = Object.values(scc);
+
   var chart = new Chart(ctx, {
       // The type of chart we want to create
-      type: 'line',
-
+      type: 'bar',
       // The data for our dataset
       data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          labels: category_labels,
           datasets: [{
               label: 'My First dataset',
               backgroundColor: 'rgb(255, 99, 132)',
               borderColor: 'rgb(255, 99, 132)',
-              data: [0, 10, 5, 2, 20, 30, 45]
+              data: category_values
           }]
       },
 
