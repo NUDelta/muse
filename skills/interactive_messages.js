@@ -105,46 +105,45 @@ module.exports = function(controller) {
                     callback_id: 'interactive_convo',
                     attachment_type: 'default',
                     actions: [
-                        {
-                            "name":"yes",
-                            "text": "Yes",
-                            "value": "yes",
-                            "type": "button",
-                        },
-                        {
-                            "name":"no",
-                            "text": "No",
-                            "value": "no",
-                            "type": "button",
-                        }
+                      {
+                          "name": "games_list",
+                          "text": "Pick a game...",
+                          "type": "select",
+                          "options": [
+                              {
+                                  "text": "Hearts",
+                                  "value": "hearts"
+                              },
+                              {
+                                  "text": "Bridge",
+                                  "value": "bridge"
+                              },
+                              {
+                                  "text": "Checkers",
+                                  "value": "checkers"
+                              },
+                              {
+                                  "text": "Chess",
+                                  "value": "chess"
+                              },
+                              {
+                                  "text": "Poker",
+                                  "value": "poker"
+                              },
+                              {
+                                  "text": "Falken's Maze",
+                                  "value": "maze"
+                              },
+                              {
+                                  "text": "Global Thermonuclear War",
+                                  "value": "war"
+                              }
+                          ]
+                      }
                     ]
                 }
             ]
-        },[
-            {
-                pattern: "yes",
-                callback: function(reply, convo) {
-                    convo.say('FABULOUS!');
-                    convo.next();
-                    // do something awesome here.
-                }
-            },
-            {
-                pattern: "no",
-                callback: function(reply, convo) {
-                    convo.say('Too bad');
-                    convo.next();
-                }
-            },
-            {
-                default: true,
-                callback: function(reply, convo) {
-                    // do nothing
-                    convo.say("Maybe this is the issue?");
-                    convo.next();
-                }
-            }
-        ]);
+        });
     });
   });
 

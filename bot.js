@@ -30,7 +30,6 @@ function getStorage(db, zone) {
         return table.find({id: id}, cb);
       },
       save: function(data, cb) {
-        console.log("inserting doc...");
         return table.insert(data, cb);
       },
       delete: function(id, cb) {
@@ -149,7 +148,6 @@ slackInteractions.action('interactive_convo', (payload,respond) => {
   return reply;
 });
 slackInteractions.action('learning_strategies', (payload,respond) => {
-  console.log(payload);
   var reply = payload.actions[0].name;
   var options = {
     token: process.env.oAuthToken,
@@ -163,13 +161,138 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
   // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
 });
 
-webserver.get('/', function(req, res){
-  res.render('index', { // TODO: Write to Mongo
-    domain: req.get('host'),
-    protocol: req.protocol,
-    glitch_domain:  process.env.PROJECT_DOMAIN,
+slackInteractions.action('stories', (payload,respond) => {
+  var reply = payload.actions[0].selected_options[0].value;
+  var options = {
+    token: process.env.oAuthToken,
+    as_user: payload.user.name,
+    channel: payload.channel.id,
+    text: reply
+  }
+  bot.api.chat.postMessage(options, (err,res) => {
+    if (err) console.error(err);
+  });
+  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
+});
+
+async function getUserData(userId,res) {
+  return res = await controller.storage.users.get(userId, (err, user_data) => {
+    return [user_data,res];
+  });
+}
+
+function getStrategies(data) {
+  const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
+  var round1 = data.filter(obj => obj.round == 1);
+  var counts = {};
+  for (var i=0; i<strategies.length; i++) {
+    counts[strategies[i]] = 0;
+  }
+  var categories = [];
+  var specific_strategies = [];
+  var responses = round1.map(obj => {
+    Object.keys(obj).forEach((key,index) => {
+      if (key === 'strategy_category') {
+        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp
+        categories.push({response: obj[key], time: obj.time, story: obj.story});
+      }
+      if (key === 'strategy') {
+        specific_strategies.push({response: obj[key], time: obj.time, story: obj.story});
+      }
+    });
+  });
+  return [counts, categories, specific_strategies];
+}
+
+function renderHome(data,res) {
+  data = data.sort((a,b) => {
+    a = new Date(a.time);
+    b = new Date(b.time);
+    return a>b ? -1 : a<b ? 1 : 0;
+  })
+  data = data.map(obj => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var pm = false;
+    var time = new Date(obj.time);
+    var hours = time.getHours();
+    var min = time.getMinutes();
+    if (hours > 11) {
+      hours = hours - 12;
+      pm = true;
+    }
+    if (hours == 0) hours = 12;
+    if (min.length == 1) min = '0' + min;
+    var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
+    obj.time = newTime;
+    return obj;
+  });
+  var user = data[0].userRealName.split(' ')[0];
+  var strategies = getStrategies(data);
+
+  return res.render('home', {
+    data: data,
+    user: user,
+    strategy_category_counts: JSON.stringify(strategies[0]),
     layout: 'layouts/default'
   });
+}
+
+webserver.get('/', function(req, res){
+  var user_id = req.universalCookies.get('user_id');
+  if (typeof user_id == 'undefined') {
+    res.render('index', { // TODO: Write to Mongo
+      domain: req.get('host'),
+      protocol: req.protocol,
+      glitch_domain:  process.env.PROJECT_DOMAIN,
+      layout: 'layouts/default'
+    });
+  }
+  else {
+    res.cookie = user_id; // Set local cookie as well
+    try {
+      var data = getUserData(user_id).then((data) => {
+        if (typeof data === 'undefined') {
+          return res.redirect('/login_error.html');
+        }
+        if (data.length === 0) {
+          return res.redirect('no_data.html');
+        }
+        // if there are no reflections re-route to a no reflections static page
+        renderHome(data,res); // Get a list of reflections
+      }).catch((err) => {
+        console.error(err);
+        return res.redirect('/login_error.html');
+      });
+    }
+    catch (err) {
+      console.error(err);
+      return res.redirect('/login_error.html');
+    }
+  }
+
+});
+
+webserver.get('/home', function(req,res) {
+  var user_id = req.universalCookies.get('user_id');
+  try {
+    var data = getUserData(user_id).then((data) => {
+      if (typeof data === 'undefined') {
+        return res.redirect('/login_error.html');
+      }
+      if (data.length === 0) {
+        return res.redirect('no_data.html');
+      }
+      // if there are no reflections re-route to a no reflections static page
+      renderHome(data,res); // Get a list of reflections
+    }).catch((err) => {
+      console.error(err);
+      return res.redirect('/login_error.html');
+    });
+  }
+  catch (err) {
+    console.error(err);
+    return res.redirect('/login_error.html');
+  }
 });
 
   // Set up a simple storage backend for keeping a record of customers

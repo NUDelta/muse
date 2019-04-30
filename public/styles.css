@@ -10,8 +10,11 @@ html {
   background-color: #FFF; }
 
 .wrapper {
+  margin: 0 auto;
+}
+.container-fluid {
   max-width: 1000px;
-  margin: 0 auto; }
+}
 
 .box {
   border: 2px solid #CCC;
@@ -121,4 +124,9 @@ div.card-body > p{
   margin-left: auto;
   margin-right: auto;
   width: 90%;
+}
+
+nav {
+  margin-left: 0;
+  width: 100%;
 }

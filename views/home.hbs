@@ -1,76 +1,89 @@
-<div class="wrapper">
-  <nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="/home">Navbar</a>
-  </nav>
-  <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-  </head>
-    <h1>{{user}}'s Reflection History</h1>
-    <body>
-      <div class="container-fluid">
-        <div class="strategies">
-          <h2>Learning Strategy Breakdown</h2>
-          <div class="history">
-            <!-- TODO: Insert chart here with breakdowns -->
-            <canvas id="myChart"></canvas> <!-- Dummy chart to see if it'll work -->
-          </div>
-        </div>
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/home">Navbar</a>
+</nav>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</head>
+  <body>
+    <div class="container-fluid">
+      <h1>{{user}}'s Reflection History</h1>
+      <div class="strategies">
+        <h2>Learning Strategy Breakdown</h2>
         <div class="history">
-          <h2>Past Reflections</h2>
-          <!-- TODO: Make reflections searchable -->
-          {{#each data}}
-          <div class="card">
-            <div class="card-header">
-              <h3>{{time}}</h3>
-            </div>
-            <div class="card-body">
-              <h3>Round: {{round}}</h3>
-              {{#if r1_answer1}}
-                <p>1. {{r1_answer1}}</p>
-              {{/if}}
-              {{#if r1_answer2}}
-              <p>2. {{r2_answer2}}</p>
-              {{/if}}
-              {{#if r1_answer2a}}
-                <p>3. {{r1_answer2a}}</p>
-              {{/if}}
-              {{#if r1_answer2b}}
-                <p>3. {{r1_answer2b}}</p>
-              {{/if}}
-              {{#if r1_answer2c}}
-                <p>3. {{r1_answer2c}}</p>
-              {{/if}}
-              {{#if r1_answer2d}}
-                <p>3. {{r1_answer2d}}</p>
-              {{/if}}
-              {{#if r1_answer2e}}
-                <p>3. {{r1_answer2e}}</p>
-              {{/if}}
-              <p>4. {{r1_answer3}}</p>
-            </div>
-          </div>
-          {{/each}}
+          <!-- TODO: Insert chart here with breakdowns -->
+          <canvas id="myChart" strategy_category_counts={{strategy_category_counts}} strategy_categories={{strategy_categories}}></canvas> <!-- Dummy chart to see if it'll work -->
         </div>
       </div>
+      <div class="history">
+        <h2>Past Reflections</h2>
+        <!-- TODO: Make reflections searchable -->
+        {{#each data}}
+        <div class="card">
+          <div class="card-header">
+            <h3>{{time}}</h3>
+          </div>
+          <div class="card-body">
+            <h3>Round: {{round}}</h3>
+            {{#if blocker}} <!-- TODO: Change all these tag names -->
+              <p>1. {{blocker}}</p>
+            {{/if}}
+            {{#if story}}
+            <p>2. {{story}}</p>
+            {{/if}}
+            {{#if story_reason}}
+              <p>3. {{story_reason}}</p>
+            {{/if}}
+            {{#if strategy}}
+              <p>4. {{strategy}}</p>
+            {{/if}}
+            {{#if recap}}
+              <p>5. {{recap}}</p>
+            {{/if}}
+            {{#if strategy_application}}
+              <p>1. {{strategy_application}}</p>
+            {{/if}} 
+            {{#if progress}}
+              <p>2. {{progress}}</p>
+            {{/if}}
+            {{#if improvement}}
+              <p>3. {{improvement}}</p>
+            {{/if}}
+            {{#if takeaways}}
+              <p>4. {{takeaways}}</p>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
 
-    </body>
-</div>
+  </body>
+
 
 <script>
+  String.prototype.replaceAll = function(str1, str2, ignore)
+  {
+    return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
+  }
   var ctx = document.getElementById('myChart').getContext('2d');
+  var strategy_category_counts = "{{strategy_category_counts}}";
+  var scc = JSON.parse(strategy_category_counts.replaceAll('&quot;','"'));
+  // strategy_category_counts = JSON.parse(strategy_category_counts);
+  var category_labels = Object.keys(scc);
+  var category_values = Object.values(scc);
+
   var chart = new Chart(ctx, {
       // The type of chart we want to create
-      type: 'line',
-
+      type: 'bar',
       // The data for our dataset
       data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          labels: category_labels,
           datasets: [{
               label: 'My First dataset',
               backgroundColor: 'rgb(255, 99, 132)',
               borderColor: 'rgb(255, 99, 132)',
-              data: [0, 10, 5, 2, 20, 30, 45]
+              data: category_values
           }]
       },
 
