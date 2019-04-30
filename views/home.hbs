@@ -25,28 +25,33 @@
           </div>
           <div class="card-body">
             <h3>Round: {{round}}</h3>
-            {{#if r1_answer1}}
-              <p>1. {{r1_answer1}}</p>
+            {{#if blocker}} <!-- TODO: Change all these tag names -->
+              <p>1. {{blocker}}</p>
             {{/if}}
-            {{#if r1_answer2}}
-            <p>2. {{r2_answer2}}</p>
+            {{#if story}}
+            <p>2. {{story}}</p>
             {{/if}}
-            {{#if r1_answer2a}}
-              <p>3. {{r1_answer2a}}</p>
+            {{#if story_reason}}
+              <p>3. {{story_reason}}</p>
             {{/if}}
-            {{#if r1_answer2b}}
-              <p>3. {{r1_answer2b}}</p>
+            {{#if strategy}}
+              <p>4. {{strategy}}</p>
             {{/if}}
-            {{#if r1_answer2c}}
-              <p>3. {{r1_answer2c}}</p>
+            {{#if recap}}
+              <p>5. {{recap}}</p>
             {{/if}}
-            {{#if r1_answer2d}}
-              <p>3. {{r1_answer2d}}</p>
+            {{#if strategy_application}}
+              <p>1. {{strategy_application}}</p>
+            {{/if}} 
+            {{#if progress}}
+              <p>2. {{progress}}</p>
             {{/if}}
-            {{#if r1_answer2e}}
-              <p>3. {{r1_answer2e}}</p>
+            {{#if improvement}}
+              <p>3. {{improvement}}</p>
             {{/if}}
-            <p>4. {{r1_answer3}}</p>
+            {{#if takeaways}}
+              <p>4. {{takeaways}}</p>
+            {{/if}}
           </div>
         </div>
         {{/each}}

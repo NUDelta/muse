@@ -57,7 +57,7 @@ module.exports = function(controller) {
               let res = most_recent.strategy;
               convo.say("In your previous reflection session, you mentioned that " + res + " could help you.");
               convo.next();
-              convo.ask("How have you made progress towards applying that learning strategy?",
+              convo.ask("How have you made progress towards applying that learning strategy, and how has that strategy helped you move closer to your goals?",
               (res,convo) => {
                 convo.next();
               }, {'key': 'strategy_application'});
@@ -114,11 +114,6 @@ session? Did you feel the need to make any changes to your process? Why or why n
               console.log("user replied yes");
               convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
 
-              var env = require('node-env-file'); // comment out for Heroku
-              path = require('path');
-              let reqPath = path.join(__dirname, '../.env');
-              env(reqPath);
-
               bot.api.reminders.add({
                 token: process.env.oAuthToken,
                 text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
@@ -150,11 +145,6 @@ session? Did you feel the need to make any changes to your process? Why or why n
             res.time = new Date();
             res.round = 2;
             res.id = message.user; // ID is Slack user ID
-
-            var env = require('node-env-file'); // comment out for Heroku
-            path = require('path');
-            let reqPath = path.join(__dirname, '../.env');
-            env(reqPath);
 
             async function getUserName(obj,controller) {
               let response = await bot.api.users.info({

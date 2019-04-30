@@ -1,4 +1,4 @@
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
 env(__dirname + '/.env');
@@ -148,8 +148,21 @@ slackInteractions.action('interactive_convo', (payload,respond) => {
   return reply;
 });
 slackInteractions.action('learning_strategies', (payload,respond) => {
-  console.log(payload);
   var reply = payload.actions[0].name;
+  var options = {
+    token: process.env.oAuthToken,
+    as_user: payload.user.name,
+    channel: payload.channel.id,
+    text: reply
+  }
+  bot.api.chat.postMessage(options, (err,res) => {
+    if (err) console.error(err);
+  });
+  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
+});
+
+slackInteractions.action('stories', (payload,respond) => {
+  var reply = payload.actions[0].selected_options[0].value;
   var options = {
     token: process.env.oAuthToken,
     as_user: payload.user.name,

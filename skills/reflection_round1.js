@@ -29,7 +29,7 @@ module.exports = function(controller) {
               attachments:[
                   {
                       title: 'What story are you currently working on?',
-                      callback_id: 'learning_strategies',
+                      callback_id: 'stories',
                       attachment_type: 'default',
                       actions: [
                         {
@@ -412,11 +412,6 @@ the need to adjust your direction? Explain why, and if you need to make changes,
               console.log("user replied yes");
               convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
 
-              var env = require('node-env-file'); // comment out for Heroku
-              path = require('path');
-              let reqPath = path.join(__dirname, '../.env');
-              env(reqPath);
-
               bot.api.reminders.add({
                 token: process.env.oAuthToken,
                 text: "Start reflection round 2 with <@muse>! Message `reflection round 2` to get started.",
@@ -463,11 +458,6 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             res.time = new Date();
             res.round = 1;
             res.id = message.user; // ID is Slack user ID
-
-            var env = require('node-env-file'); // comment out for Heroku
-            path = require('path');
-            let reqPath = path.join(__dirname, '../.env');
-            env(reqPath);
 
             async function getUserName(obj,controller) {
               let response = await bot.api.users.info({
