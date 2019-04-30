@@ -1,11 +1,11 @@
 var debug = require('debug')('botkit:oauth');
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var request = require('request');
 
-env(path.join(__dirname, '../../', '.env'));
-if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-  usage_tip();
-}
+// env(path.join(__dirname, '../../', '.env'));
+// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+//   usage_tip();
+// }
 
 module.exports = function(webserver, controller) {
     var handler = {
