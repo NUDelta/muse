@@ -28,7 +28,7 @@ module.exports = function(controller) {
           convo.ask({
               attachments:[
                   {
-                      title: 'What story are you currently working on?',
+                      title: 'Choose the item that corresponds best to the sprint story you are currently working on.',
                       callback_id: 'stories',
                       attachment_type: 'default',
                       actions: [
@@ -112,6 +112,10 @@ module.exports = function(controller) {
                                 {
                                     "text": "prototyping",
                                     "value": "prototyping"
+                                },
+                                {
+                                    "text": "other",
+                                    "value": "other"
                                 }
                             ]
                         }
