@@ -39,7 +39,6 @@ module.exports = function(controller) {
             setInterval(followUp,30*60000);
 
             var round1_docs = user_data.filter((o) => { return o.round == 1; });
-            console.log(round1_docs);
             if (round1_docs.length > 0) {
               var get_most_recent_doc = function(array, t) {
                 let res = array.map((o) => {
@@ -54,8 +53,7 @@ module.exports = function(controller) {
               }
 
               let most_recent_time = Math.max.apply(Math, round1_docs.map((o) => { return new Date(o.time); }));
-              console.log(most_recent_time);
-              let most_recent = get_most_recent_doc(round1_docs, most_recent_time);
+              let most_recent = round1_docs[round1_docs.length-1];
               console.log(most_recent);
               let res = most_recent.strategy;
               convo.say("In your previous reflection session, you mentioned that " + res + " could help you.");
