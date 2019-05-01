@@ -40,21 +40,7 @@ module.exports = function(controller) {
 
             var round1_docs = user_data.filter((o) => { return o.round == 1; });
             if (round1_docs.length > 0) {
-              var get_most_recent_doc = function(array, t) {
-                let res = array.map((o) => {
-                  let d = new Date(o.time);
-                  if (d.getTime() == t) {
-                    return o;
-                  }
-                });
-                if (res.length > 0) {
-                  return res[0];
-                }
-              }
-
-              let most_recent_time = Math.max.apply(Math, round1_docs.map((o) => { return new Date(o.time); }));
               let most_recent = round1_docs[round1_docs.length-1];
-              console.log(most_recent);
               let res = most_recent.strategy;
               convo.say("In your previous reflection session, you mentioned that " + res + " could help you.");
               convo.next();
