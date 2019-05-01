@@ -153,7 +153,7 @@ slackInteractions.action('learning_strategies', (payload,respond) => {
     token: process.env.botToken,
     as_user: payload.user.name,
     channel: payload.channel.id,
-    text: reply
+    text: "You have chosen " + reply + ". If that is correct, reply " + reply + " to this message. Otherwise, reply with a different strategy in the list.";
   }
   bot.api.chat.postMessage(options, (err,res) => {
     if (err) console.error(err);
@@ -167,7 +167,7 @@ slackInteractions.action('stories', (payload,respond) => {
     token: process.env.botToken,
     as_user: payload.user.name,
     channel: payload.channel.id,
-    text: reply
+    text: "You have chosen " + reply + ". If that is correct, reply " + reply + " to this message. Otherwise, reply with a different strategy in the list.";
   }
   bot.api.chat.postMessage(options, (err,res) => {
     if (err) console.error(err);

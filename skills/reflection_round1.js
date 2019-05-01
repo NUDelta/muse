@@ -1,5 +1,5 @@
 module.exports = function(controller) {
-  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"],
+  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       bot.createConversation(message,(err,convo) => {
