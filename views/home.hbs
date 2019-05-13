@@ -3,6 +3,7 @@
 </nav>
 <head>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 </head>
   <body>
@@ -10,10 +11,47 @@
       <h1>{{user}}'s Reflection History</h1>
       <div class="strategies">
         <h2>Learning Strategy Breakdown</h2>
-        <div class="history">
+        <div class="tab">
           <!-- TODO: Insert chart here with breakdowns -->
-          <canvas id="myChart" strategy_category_counts={{strategy_category_counts}} strategy_categories={{strategy_categories}}></canvas> <!-- Dummy chart to see if it'll work -->
+          <button class="tablinks" onclick="openChart(event, 'category_div')">By Category</button>
+          <button class="tablinks" onclick="openChart(event, 'strategy_div')">By Strategy</button>
         </div>
+
+        <div id="category_div" class="tabcontent active">
+          <canvas id="myChart"></canvas>
+        </div>
+
+        <div id="strategy_div" class="strategy_tabcontent">
+          <div class="strategy_tab">
+            <button class="strat_tablinks" onclick="openStrategy(event, 'planningDiv')">Planning</button>
+            <button class="strat_tablinks" onclick="openStrategy(event, 'docDiv')">Documenting</button>
+            <button class="strat_tablinks" onclick="openStrategy(event, 'commDiv')">Communication</button>
+            <button class="strat_tablinks" onclick="openStrategy(event, 'helpDiv')">Help Seeking</button>
+            <button class="strat_tablinks" onclick="openStrategy(event, 'growthDiv')">Grit &amp; Growth</button>
+          </div>
+
+          <div id="planningDiv" class="strategy_tabcontent active">
+            <canvas id="planningChart"></canvas>
+          </div>
+
+          <div id="docDiv" class="strategy_tabcontent">
+            <canvas id="docChart"></canvas>
+          </div>
+
+          <div id="commDiv" class="strategy_tabcontent">
+            <canvas id="commChart"></canvas>
+          </div>
+
+          <div id="helpDiv" class="strategy_tabcontent">
+            <canvas id="helpChart"></canvas>
+          </div>
+
+          <div id="growthDiv" class="strategy_tabcontent">
+            <canvas id="growthChart"></canvas>
+          </div>
+
+        </div>
+
       </div>
       <div class="history">
         <h2>Past Reflections</h2>
@@ -34,11 +72,14 @@
             {{#if story_reason}}
               <p>3. {{story_reason}}</p>
             {{/if}}
+            {{#if strategy_category}}
+              <p>4. {{strategy_category}}</p>
+            {{/if}}
             {{#if strategy}}
-              <p>4. {{strategy}}</p>
+              <p>5. {{strategy}}</p>
             {{/if}}
             {{#if recap}}
-              <p>5. {{recap}}</p>
+              <p>6. {{recap}}</p>
             {{/if}}
             {{#if strategy_application}}
               <p>1. {{strategy_application}}</p>
@@ -66,10 +107,48 @@
   {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
   }
+
+  function openChart(evt, chart) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(chart).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+  //
+  // function openStrategy(evt, strategy) {
+  //   var i, strategy_tabcontent, strat_tablinks;
+  // 
+  //   strategy_tabcontent = document.getElementsByClassName("strategy_tabcontent");
+  //   for (i = 0; i < strategy_tabcontent.length; i++) {
+  //     strategy_tabcontent[i].style.display = "none";
+  //   }
+  //
+  //   strat_tablinks = document.getElementsByClassName("strat_tablinks");
+  //   for (i = 0; i < strat_tablinks.length; i++) {
+  //     strat_tablinks[i].className = strat_tablinks[i].className.replace(" active","");
+  //   }
+  //
+  //   document.getElementById(strategy).style.display = "block";
+  //   evt.currentTarget.className += " active";
+  // }
+
   var ctx = document.getElementById('myChart').getContext('2d');
   var strategy_category_counts = "{{strategy_category_counts}}";
   var scc = JSON.parse(strategy_category_counts.replaceAll('&quot;','"'));
-  // strategy_category_counts = JSON.parse(strategy_category_counts);
   var category_labels = Object.keys(scc);
   var category_values = Object.values(scc);
 
@@ -80,14 +159,48 @@
       data: {
           labels: category_labels,
           datasets: [{
-              label: 'My First dataset',
-              backgroundColor: 'rgb(255, 99, 132)',
-              borderColor: 'rgb(255, 99, 132)',
+              label: 'Strategy Category Breakdown',
+              backgroundColor: ["#FC6584", "#FD9F48", "#FFCC61", "#52C0BF", "#3BA4E8"],
+              // borderColor: 'rgb(255, 99, 132)',
               data: category_values
           }]
       },
-
       // Configuration options go here
-      options: {}
+      options: {responsive: true}
   });
+
+  var strategy_counts = "{{strategy_counts}}";
+  var sc = JSON.parse(strategy_counts.replaceAll('&quot;','"'));
+  var strategies = Object.values(sc); // list of dictionaries of strategies and counts
+
+  var plan_keys = Object.keys(strategies[0]);
+  var plan_vals = Object.values(strategies[0]);
+  var plan_ctx = document.getElementById('planningChart').getContext('2d');
+  var plan_chart = new Chart(plan_ctx, {
+    type: 'bar',
+    data: {
+      labels: plan_keys,
+      datasets: [{
+        label: 'Planning Strategies Breakdown',
+        backgroundColor: '#FC6584',
+        borderColor: '#FC6584',
+        data: plan_vals
+      }]
+    },
+    options: {responsive: true} // TODO: Resize canvas when window size changes
+  });
+
+  var doc_keys = Object.keys(strategies[1]);
+  var doc_vals = Object.values(strategies[1]);
+
+  var comm_keys = Object.keys(strategies[2]);
+  var comm_vals = Object.values(strategies[2]);
+
+  var help_keys = Object.keys(strategies[3]);
+  var help_vals = Object.values(strategies[3]);
+
+  var growth_keys = Object.keys(strategies[4]);
+  var growth_vals = Object.values(strategies[4]);
+
+
 </script>

@@ -86,6 +86,39 @@ session? Did you feel the need to make any changes to your process? Why or why n
         var askTime = (convo,message) => {
           convo.ask("When can I ping you to reflect again?",
             (res,convo) => {
+
+              var verifyTime = (res,convo,message) => {
+                const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
+                const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
+                convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
+                  if (yes.includes(res2.text.toLowerCase())) {
+                    console.log("user replied yes");
+                    convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
+
+                    bot.api.reminders.add({
+                      token: process.env.oAuthToken,
+                      text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
+                      time: res.text,
+                      user: message.user
+                    }, (err,res) => {
+                      if (err) {
+                        convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
+                        askTime(convo,message);
+                      }
+                    });
+                    convo.next();
+                  }
+                  else if (no.includes(res.text.toLowerCase())) {
+                    askTime(convo,message);
+                    convo.next();
+                  }
+                  else {
+                    convo.say("Sorry, I didn't understand that.");
+                    askTime(convo,message);
+                  }
+                }, {});
+              }
+              
               verifyTime(res,convo,message);
               convo.next();
             }, {'key': 'next_time'});
@@ -93,36 +126,11 @@ session? Did you feel the need to make any changes to your process? Why or why n
 
         askTime(convo,message);
 
-        var verifyTime = (res,convo,message) => {
-          const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
-          const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
-          convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
-            if (yes.includes(res2.text.toLowerCase())) {
-              console.log("user replied yes");
-              convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
+        var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 
-              bot.api.reminders.add({
-                token: process.env.oAuthToken,
-                text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
-                time: res.text,
-                user: message.user
-              }, (err,res) => {
-                if (err) {
-                  convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
-                  askTime(convo,message);
-                }
-              });
-              convo.next();
-            }
-            else if (no.includes(res.text.toLowerCase())) {
-              askTime(convo,message);
-              convo.next();
-            }
-            else {
-              convo.say("Sorry, I didn't understand that.");
-              askTime(convo,message);
-            }
-          }, {});
+        env(__dirname + '/.env');
+        if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+          usage_tip();
         }
 
         convo.on('end',(convo) => {
