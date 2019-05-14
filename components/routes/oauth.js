@@ -70,25 +70,45 @@ module.exports = function(webserver, controller) {
 
                     function getStrategies(data) {
                       const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
+                      const planning_strategies = ['goal setting', 'prioritization', 'updating sprint plan', 'respecting time constraints'];
+                      const doc_strategies = ['updating canvases', 'updating design log'];
+                      const comm_strategies = ['reporting progress', 'availability'];
+                      const help_strategies = ['seek help from other students', 'seek help from mentors', "make efficient use of others' time", 'helping others'];
+                      const growth_strategies = ['identifying where to go next', 'will to achieve goals', 'avoiding distractions', 'embracing challenges', 'stepping out of my comfort zone'];
+                      const category_matrix = [planning_strategies, doc_strategies, comm_strategies, help_strategies, growth_strategies];
+
                       var round1 = data.filter(obj => obj.round == 1);
-                      var counts = {};
+                      var counts = {}; // counts for strategy categories
+                      var strategy_counts = {}; // nested dictionary of strategy categories and specific strategies
                       for (var i=0; i<strategies.length; i++) {
                         counts[strategies[i]] = 0;
+                        strategy_counts[strategies[i]] = {};
+                        var curr_strat = category_matrix[i];
+                        for (var j=0; j<curr_strat.length; j++) {
+                          let curr = curr_strat[j];
+                          strategy_counts[strategies[i]][curr] = 0;
+                        }
                       }
+
                       var categories = [];
                       var specific_strategies = [];
                       var responses = round1.map(obj => {
                         Object.keys(obj).forEach((key,index) => {
                           if (key === 'strategy_category') {
-                            counts[obj[key]] += 1; // TODO: Specify sprint of timestamp
-                            categories.push({response: obj[key], time: obj.time, story: obj.story});
+                            let res = obj[key];
+                            res = res.toLowerCase();
+                            counts[res] += 1; // TODO: Specify sprint of timestamp
+                            categories.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+                            strategy_counts[res][obj.strategy.toLowerCase()] += 1;
                           }
                           if (key === 'strategy') {
-                            specific_strategies.push({response: obj[key], time: obj.time, story: obj.story});
+                            let res = obj[key];
+                            res = res.toLowerCase();
+                            specific_strategies.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
                           }
                         });
                       });
-                      return [counts, categories, specific_strategies];
+                      return [counts, categories, specific_strategies, strategy_counts];
                     }
 
                     function renderHome(data) {
@@ -98,19 +118,7 @@ module.exports = function(webserver, controller) {
                         return a>b ? -1 : a<b ? 1 : 0;
                       })
                       data = data.map(obj => {
-                        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                        var pm = false;
-                        var time = new Date(obj.time);
-                        var hours = time.getHours();
-                        var min = time.getMinutes();
-                        if (hours > 11) {
-                          hours = hours - 12;
-                          pm = true;
-                        }
-                        if (hours == 0) hours = 12;
-                        if (min.length == 1) min = '0' + min;
-                        var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
-                        obj.time = newTime;
+                        obj.time = new Date(obj.time).toLocaleString();
                         return obj;
                       });
                       var user = data[0].userRealName.split(' ')[0];
@@ -120,6 +128,7 @@ module.exports = function(webserver, controller) {
                         data: data,
                         user: user,
                         strategy_category_counts: JSON.stringify(strategies[0]),
+                        strategy_counts: JSON.stringify(strategies[3]),
                         layout: '../views/layouts/default'
                       });
                     }

@@ -1,5 +1,5 @@
 module.exports = function(controller) {
-  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1"], // Make regex to match all similar strings
+  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       bot.createConversation(message,(err,convo) => {
@@ -124,7 +124,7 @@ module.exports = function(controller) {
               ]
           }, (res,convo) => { convo.next() }, {'key': 'story'});
 
-          convo.ask("How will the story that you are currently working on help you overcome this blocker and make progress towards your goals?",
+          convo.ask("How will the story that you are currently working on help you overcome this blocker?",
           (res,convo) => {
             convo.next();
           }, {'key': 'story_reason'});
@@ -402,28 +402,44 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
           }, {'key': 'recap'}, 'q4');
 
+        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+        // var path = require('path');
+        //
+        // env(path.join(__dirname, '../.env'));
+        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+        //   usage_tip();
+        // }
+
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
-            verifyTime(res,convo,message);
-            convo.next();
-          }, {'key': 'next_time'}, 'askTime');
+            var verifyTime = (res,convo,message) => {
+              const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
+              const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
+              convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
+                if (yes.includes(res2.text.toLowerCase())) {
+                  console.log("user replied yes");
+                  convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
 
-        var verifyTime = (res,convo,message) => {
-          const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
-          const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
-          convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
-            if (yes.includes(res2.text.toLowerCase())) {
-              console.log("user replied yes");
-              convo.say("Great, I'll send you a reminder then! You have successfully completed your reflection!");
-
-              bot.api.reminders.add({
-                token: process.env.oAuthToken,
-                text: "Start reflection round 2 with <@muse>! Message `reflection round 2` to get started.",
-                time: res.text,
-                user: message.user
-              }, (err,res) => {
-                if (err) {
-                  convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
+                  bot.api.reminders.add({
+                    token: process.env.oAuthToken,
+                    text: "Start reflection round 2 with <@muse>! Message `reflection round 2` to get started.",
+                    time: res.text,
+                    user: message.user
+                  }, (err,res) => {
+                    if (err) {
+                      convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
+                      convo.next();
+                      convo.ask("When can I ping you again to complete the second round of reflection questions?",
+                      (res3,convo) => {
+                        convo.next();
+                        verifyTime(res3,convo,message);
+                      });
+                    }
+                  });
+                  convo.next();
+                }
+                else if (no.includes(res2.text.toLowerCase())) {
+                  console.log("user replied no");
                   convo.next();
                   convo.ask("When can I ping you again to complete the second round of reflection questions?",
                   (res3,convo) => {
@@ -431,29 +447,21 @@ the need to adjust your direction? Explain why, and if you need to make changes,
                     verifyTime(res3,convo,message);
                   });
                 }
-              });
-              convo.next();
+                else {
+                  convo.say("Sorry, I didn't understand that.");
+                  convo.next();
+                  convo.ask("When can I ping you again to complete the second round of reflection questions?",
+                  (res3,convo) => {
+                    convo.next();
+                    verifyTime(res3,convo,message);
+                  });
+                }
+              }, {});
             }
-            else if (no.includes(res2.text.toLowerCase())) {
-              console.log("user replied no");
-              convo.next();
-              convo.ask("When can I ping you again to complete the second round of reflection questions?",
-              (res3,convo) => {
-                convo.next();
-                verifyTime(res3,convo,message);
-              });
-            }
-            else {
-              convo.say("Sorry, I didn't understand that.");
-              convo.next();
-              convo.ask("When can I ping you again to complete the second round of reflection questions?",
-              (res3,convo) => {
-                convo.next();
-                verifyTime(res3,convo,message);
-              });
-            }
-          }, {});
-        }
+
+            verifyTime(res,convo,message);
+            convo.next();
+          }, {'key': 'next_time'}, 'askTime');
 
         convo.on('end',(convo) => {
           if (convo.status == 'completed') {

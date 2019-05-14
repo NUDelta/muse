@@ -97,40 +97,6 @@ bot.identity = {
   name: process.env.botName
 }
 
-// Get information about all users
-// Should update storage
-// // let users;
-// // console.log("calling on bot users");
-// bot.api.users.list(options, (err,res) => {
-//   if (!err) {
-//     // console.log(res);
-//     // console.log("updating users");
-//     users = res; // TODO: make a promise so this updates
-//     // console.log(users);
-//   }
-//   else {
-//     console.log(err);
-//   }
-// });
-//
-// setTimeout(function afterTwoSeconds() {
-//   console.log(users)
-// }, 2000)
-
-// bot.api.chat.postMessage({
-//   token: process.env.botToken,
-//   channel: "@vcabales",
-//   text: '</remind> <@vcabales> "go to the gym" in 10 minutes'
-// }, (err, res) => {
-//   if (!err) {
-//     console.log(res);
-//     console.log("sending message to channel");
-//   }
-//   else {
-//     console.log(err);
-//   }
-// })
-
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var server = require(__dirname + '/components/express_webserver.js')(controller);
 var webserver = server[0];
@@ -183,25 +149,45 @@ async function getUserData(userId,res) {
 
 function getStrategies(data) {
   const strategies = ['sprint planning and execution','documenting process/progress','communication','help seeking and giving','grit and growth'];
+  const planning_strategies = ['goal setting', 'prioritization', 'updating sprint plan', 'respecting time constraints'];
+  const doc_strategies = ['updating canvases', 'updating design log'];
+  const comm_strategies = ['reporting progress', 'availability'];
+  const help_strategies = ['seek help from other students', 'seek help from mentors', "make efficient use of others' time", 'helping others'];
+  const growth_strategies = ['identifying where to go next', 'will to achieve goals', 'avoiding distractions', 'embracing challenges', 'stepping out of my comfort zone'];
+  const category_matrix = [planning_strategies, doc_strategies, comm_strategies, help_strategies, growth_strategies];
+
   var round1 = data.filter(obj => obj.round == 1);
-  var counts = {};
+  var counts = {}; // counts for strategy categories
+  var strategy_counts = {}; // nested dictionary of strategy categories and specific strategies
   for (var i=0; i<strategies.length; i++) {
     counts[strategies[i]] = 0;
+    strategy_counts[strategies[i]] = {};
+    var curr_strat = category_matrix[i];
+    for (var j=0; j<curr_strat.length; j++) {
+      let curr = curr_strat[j];
+      strategy_counts[strategies[i]][curr] = 0;
+    }
   }
+
   var categories = [];
   var specific_strategies = [];
   var responses = round1.map(obj => {
     Object.keys(obj).forEach((key,index) => {
       if (key === 'strategy_category') {
-        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp
-        categories.push({response: obj[key], time: obj.time, story: obj.story});
+        let res = obj[key];
+        res = res.toLowerCase();
+        counts[res] += 1; // TODO: Specify sprint of timestamp
+        categories.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+        strategy_counts[res][obj.strategy.toLowerCase()] += 1;
       }
       if (key === 'strategy') {
-        specific_strategies.push({response: obj[key], time: obj.time, story: obj.story});
+        let res = obj[key];
+        res = res.toLowerCase();
+        specific_strategies.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
       }
     });
   });
-  return [counts, categories, specific_strategies];
+  return [counts, categories, specific_strategies, strategy_counts];
 }
 
 function renderHome(data,res) {
@@ -211,19 +197,7 @@ function renderHome(data,res) {
     return a>b ? -1 : a<b ? 1 : 0;
   })
   data = data.map(obj => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    var pm = false;
-    var time = new Date(obj.time);
-    var hours = time.getHours();
-    var min = time.getMinutes();
-    if (hours > 11) {
-      hours = hours - 12;
-      pm = true;
-    }
-    if (hours == 0) hours = 12;
-    if (min.length == 1) min = '0' + min;
-    var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
-    obj.time = newTime;
+    obj.time = new Date(obj.time).toLocaleString();
     return obj;
   });
   var user = data[0].userRealName.split(' ')[0];
@@ -233,6 +207,7 @@ function renderHome(data,res) {
     data: data,
     user: user,
     strategy_category_counts: JSON.stringify(strategies[0]),
+    strategy_counts: JSON.stringify(strategies[3]),
     layout: 'layouts/default'
   });
 }
