@@ -8,20 +8,19 @@
 </head>
   <body>
     <div class="container-fluid">
-      <h1>{{user}}'s Reflection History</h1>
       <div class="strategies">
+        <h1>{{user}}'s Reflection History</h1>
         <h2>Learning Strategy Breakdown</h2>
         <div class="tab">
-          <!-- TODO: Insert chart here with breakdowns -->
           <button class="tablinks" onclick="openChart(event, 'category_div')">By Category</button>
           <button class="tablinks" onclick="openChart(event, 'strategy_div')">By Strategy</button>
         </div>
 
-        <div id="category_div" class="tabcontent active">
+        <div id="category_div" class="tabcontent active-tab">
           <canvas id="myChart"></canvas>
         </div>
 
-        <div id="strategy_div" class="strategy_tabcontent">
+        <div id="strategy_div" class="tabcontent">
           <div class="strategy_tab">
             <button class="strat_tablinks" onclick="openStrategy(event, 'planningDiv')">Planning</button>
             <button class="strat_tablinks" onclick="openStrategy(event, 'docDiv')">Documenting</button>
@@ -30,7 +29,7 @@
             <button class="strat_tablinks" onclick="openStrategy(event, 'growthDiv')">Grit &amp; Growth</button>
           </div>
 
-          <div id="planningDiv" class="strategy_tabcontent active">
+          <div id="planningDiv" class="strategy_tabcontent active-strategy">
             <canvas id="planningChart"></canvas>
           </div>
 
@@ -63,35 +62,49 @@
           </div>
           <div class="card-body">
             <h3>Round: {{round}}</h3>
-            {{#if blocker}} <!-- TODO: Change all these tag names -->
-              <p>1. {{blocker}}</p>
+            {{#if blocker}}
+              <p><b><i>1. What blocker are you currently struggling with? What did you go over during SIG to overcome this blocker?</i></b></p>
+              <p class="response">{{blocker}}</p>
             {{/if}}
             {{#if story}}
-            <p>2. {{story}}</p>
+              <p><b><i>2. Choose the item that corresponds best to the sprint story you are currently working on.</i></b></p>
+              <p class="response">{{story}}</p>
             {{/if}}
             {{#if story_reason}}
-              <p>3. {{story_reason}}</p>
+              <p><b><i>3. How will the story that you are currently working on help you overcome this blocker?</i></b></p>
+              <p class="response">{{story_reason}}</p>
             {{/if}}
             {{#if strategy_category}}
-              <p>4. {{strategy_category}}</p>
+              <p><b><i>4. Select the learning strategy category that will help you overcome your blocker for this sprint. Recall what you went over with your mentors during SIG to choose.</i></b></p>
+              <p class="response">{{strategy_category}}</p>
             {{/if}}
             {{#if strategy}}
-              <p>5. {{strategy}}</p>
+              <p><b><i>5. Out of the strategies below, which would you like to work towrads improving?</i></b></p>
+              <p class="response">{{strategy}}</p>
+            {{/if}}
+            {{#if strategy_reason}}
+              <p><b><i>6. How will working on this strategy help you accomplish your goals?</i></b></p>
+              <p class="response">{{strategy_reason}}</p>
             {{/if}}
             {{#if recap}}
-              <p>6. {{recap}}</p>
+              <p><b><i>7. Are you satisfied with your current progress, or do you feel the need to adjust your direction? Explain why, and if you need to make changes, detail what those changes would be.</i></b></p>
+              <p class="response">{{recap}}</p>
             {{/if}}
             {{#if strategy_application}}
-              <p>1. {{strategy_application}}</p>
+              <p><b><i>1. How have you made progress towards applying the strategy you mentioned previosuly, and how has that strategy helped you move closer to your goals?</i></b></p>
+              <p class="response">{{strategy_application}}</p>
             {{/if}}
             {{#if progress}}
-              <p>2. {{progress}}</p>
+              <p><b><i>2. How do you feel about your progress during this work session? Did you feel the need to make any changes to your process? Why or why not?</i></b></p>
+              <p>{{progress}}</p>
             {{/if}}
             {{#if improvement}}
-              <p>3. {{improvement}}</p>
+              <p><b><i>3. What have you been doing well, and what could be improved?</i></b></p>
+              <p class="response">{{improvement}}</p>
             {{/if}}
             {{#if takeaways}}
-              <p>4. {{takeaways}}</p>
+              <p><b><i>4. Describe your main takeaways from this work session.</i></b></p>
+              <p class="response">{{takeaways}}</p>
             {{/if}}
           </div>
         </div>
@@ -116,35 +129,38 @@
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = "none";
+      tabcontent[i].className = tabcontent[i].className.replace(" active-tab", "");
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
+      tablinks[i].className = tablinks[i].className.replace(" active","");
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(chart).style.display = "block";
+    document.getElementById(chart).className += " active-tab";
     evt.currentTarget.className += " active";
   }
-  //
-  // function openStrategy(evt, strategy) {
-  //   var i, strategy_tabcontent, strat_tablinks;
-  // 
-  //   strategy_tabcontent = document.getElementsByClassName("strategy_tabcontent");
-  //   for (i = 0; i < strategy_tabcontent.length; i++) {
-  //     strategy_tabcontent[i].style.display = "none";
-  //   }
-  //
-  //   strat_tablinks = document.getElementsByClassName("strat_tablinks");
-  //   for (i = 0; i < strat_tablinks.length; i++) {
-  //     strat_tablinks[i].className = strat_tablinks[i].className.replace(" active","");
-  //   }
-  //
-  //   document.getElementById(strategy).style.display = "block";
-  //   evt.currentTarget.className += " active";
-  // }
+
+  function openStrategy(evt, strategy) {
+    var i, strategy_tabcontent, strat_tablinks;
+
+    strategy_tabcontent = document.getElementsByClassName("strategy_tabcontent");
+    for (i = 0; i < strategy_tabcontent.length; i++) {
+      strategy_tabcontent[i].style.display = "none";
+      strategy_tabcontent[i].className = strategy_tabcontent[i].className.replace(" active-strategy","")
+    }
+
+    strat_tablinks = document.getElementsByClassName("strat_tablinks");
+    for (i = 0; i < strat_tablinks.length; i++) {
+      strat_tablinks[i].className = strat_tablinks[i].className.replace(" active","");
+    }
+
+    document.getElementById(strategy).style.display = "block";
+    document.getElementById(strategy).className += " active-strategy";
+    evt.currentTarget.className += " active";
+  }
 
   var ctx = document.getElementById('myChart').getContext('2d');
   var strategy_category_counts = "{{strategy_category_counts}}";
@@ -161,12 +177,20 @@
           datasets: [{
               label: 'Strategy Category Breakdown',
               backgroundColor: ["#FC6584", "#FD9F48", "#FFCC61", "#52C0BF", "#3BA4E8"],
-              // borderColor: 'rgb(255, 99, 132)',
               data: category_values
           }]
       },
       // Configuration options go here
-      options: {responsive: true}
+      options: {
+        responsive: true,
+        scales: {
+          yAxes: [{
+              ticks: {
+                  beginAtZero: true
+              }
+          }]
+        }
+      }
   });
 
   var strategy_counts = "{{strategy_counts}}";
@@ -187,20 +211,122 @@
         data: plan_vals
       }]
     },
-    options: {responsive: true} // TODO: Resize canvas when window size changes
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+      }
+    }
   });
 
   var doc_keys = Object.keys(strategies[1]);
   var doc_vals = Object.values(strategies[1]);
+  var doc_ctx = document.getElementById('docChart').getContext('2d');
+  var doc_chart = new Chart(doc_ctx, {
+    type: 'bar',
+    data: {
+      labels: doc_keys,
+      datasets: [{
+        label: 'Documenting Progress Strategies Breakdown',
+        backgroundColor: "#FD9F48",
+        borderColor: "#FD9F48",
+        data: doc_vals
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+      }
+    }
+  });
 
   var comm_keys = Object.keys(strategies[2]);
   var comm_vals = Object.values(strategies[2]);
+  var comm_ctx = document.getElementById('commChart').getContext('2d');
+  var doc_chart = new Chart(comm_ctx, {
+    type: 'bar',
+    data: {
+      labels: comm_keys,
+      datasets: [{
+        label: 'Communication Strategies Breakdown',
+        backgroundColor: "#FFCC61",
+        borderColor: "#FFCC61",
+        data: comm_vals
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+      }
+    }
+  });
 
   var help_keys = Object.keys(strategies[3]);
   var help_vals = Object.values(strategies[3]);
+  help_keys[2] = "make efficient use of others' time"
+  var help_ctx = document.getElementById('helpChart').getContext('2d');
+  var help_chart = new Chart(help_ctx, {
+    type: 'bar',
+    data: {
+      labels: help_keys,
+      datasets: [{
+        label: 'Help Seeking Strategies',
+        backgroundColor: "#52C0BF",
+        borderColor: "#52C0BF",
+        data: help_vals
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+      }
+    }
+  })
 
   var growth_keys = Object.keys(strategies[4]);
   var growth_vals = Object.values(strategies[4]);
+  var growth_ctx = document.getElementById('growthChart').getContext('2d');
+  var growth_chart = new Chart(growth_ctx, {
+    type: 'bar',
+    data: {
+      labels: growth_keys,
+      datasets: [{
+        label: 'Grit & Growth Strategies',
+        backgroundColor: "#3BA4E8",
+        borderColor: "#3BA4E8",
+        data: growth_vals
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+      }
+    }
+  })
 
 
 </script>

@@ -186,7 +186,7 @@ function getStrategies(data) {
   const planning_strategies = ['goal setting', 'prioritization', 'updating sprint plan', 'respecting time constraints'];
   const doc_strategies = ['updating canvases', 'updating design log'];
   const comm_strategies = ['reporting progress', 'availability'];
-  const help_strategies = ['seek help from other students', 'seek help from mentors', 'make efficient use of others\' time', 'helping others'];
+  const help_strategies = ['seek help from other students', 'seek help from mentors', "make efficient use of others' time", 'helping others'];
   const growth_strategies = ['identifying where to go next', 'will to achieve goals', 'avoiding distractions', 'embracing challenges', 'stepping out of my comfort zone'];
   const category_matrix = [planning_strategies, doc_strategies, comm_strategies, help_strategies, growth_strategies];
 
@@ -208,12 +208,16 @@ function getStrategies(data) {
   var responses = round1.map(obj => {
     Object.keys(obj).forEach((key,index) => {
       if (key === 'strategy_category') {
-        counts[obj[key]] += 1; // TODO: Specify sprint of timestamp
-        categories.push({response: obj[key].toLowerCase(), time: obj.time, story: obj.story.toLowerCase()});
-        strategy_counts[obj[key]][obj.strategy] += 1;
+        let res = obj[key];
+        res = res.toLowerCase();
+        counts[res] += 1; // TODO: Specify sprint of timestamp
+        categories.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+        strategy_counts[res][obj.strategy.toLowerCase()] += 1;
       }
       if (key === 'strategy') {
-        specific_strategies.push({response: obj[key].toLowerCase(), time: obj.time, story: obj.story.toLowerCase()});
+        let res = obj[key];
+        res = res.toLowerCase();
+        specific_strategies.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
       }
     });
   });
