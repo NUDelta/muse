@@ -197,20 +197,6 @@ function renderHome(data,res) {
     return a>b ? -1 : a<b ? 1 : 0;
   })
   data = data.map(obj => {
-    // const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    // var pm = false;
-    // var time = new Date(obj.time);
-    // var hours = time.getHours();
-    // var min = time.getMinutes();
-    // if (hours > 11) {
-    //   hours = hours - 12;
-    //   pm = true;
-    // }
-    // if (hours == 0) hours = 12;
-    // if (min.length == 1) min = '0' + min;
-    // var newTime = months[time.getMonth()] + ' ' + time.getDate() + ', ' + time.getFullYear() + ' ' + hours + ':' + min + (pm ? 'pm' : 'am');
-    // obj.time = newTime;
-    // return obj;
     obj.time = new Date(obj.time).toLocaleString();
     return obj;
   });

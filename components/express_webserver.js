@@ -7,7 +7,7 @@ var debug = require('debug')('botkit:webserver');
 var http = require('http');
 var hbs = require('express-hbs');
 const { createMessageAdapter } = require('@slack/interactive-messages');
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 
 module.exports = function(controller) {
     // var env = require('node-env-file'); // comment out for Heroku
