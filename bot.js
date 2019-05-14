@@ -1,10 +1,10 @@
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
-env(__dirname + '/.env');
-if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-  usage_tip();
-}
+// env(__dirname + '/.env');
+// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+//   usage_tip();
+// }
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
@@ -96,40 +96,6 @@ bot.identity = {
   id: process.env.botId,
   name: process.env.botName
 }
-
-// Get information about all users
-// Should update storage
-// // let users;
-// // console.log("calling on bot users");
-// bot.api.users.list(options, (err,res) => {
-//   if (!err) {
-//     // console.log(res);
-//     // console.log("updating users");
-//     users = res; // TODO: make a promise so this updates
-//     // console.log(users);
-//   }
-//   else {
-//     console.log(err);
-//   }
-// });
-//
-// setTimeout(function afterTwoSeconds() {
-//   console.log(users)
-// }, 2000)
-
-// bot.api.chat.postMessage({
-//   token: process.env.botToken,
-//   channel: "@vcabales",
-//   text: '</remind> <@vcabales> "go to the gym" in 10 minutes'
-// }, (err, res) => {
-//   if (!err) {
-//     console.log(res);
-//     console.log("sending message to channel");
-//   }
-//   else {
-//     console.log(err);
-//   }
-// })
 
 // Set up an Express-powered webserver to expose oauth and webhook endpoints
 var server = require(__dirname + '/components/express_webserver.js')(controller);
