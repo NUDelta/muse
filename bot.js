@@ -1,10 +1,10 @@
-// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
-// env(__dirname + '/.env');
-// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-//   usage_tip();
-// }
+env(__dirname + '/.env');
+if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+  usage_tip();
+}
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
@@ -112,33 +112,6 @@ slackInteractions.action('interactive_convo', (payload,respond) => {
   const reply = payload.original_message;
   delete reply.attachments[0].actions;
   return reply;
-});
-slackInteractions.action('learning_strategies', (payload,respond) => {
-  var reply = payload.actions[0].name;
-  var options = {
-    token: process.env.botToken,
-    as_user: payload.user.name,
-    channel: payload.channel.id,
-    text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different strategy in the list."
-  }
-  bot.api.chat.postMessage(options, (err,res) => {
-    if (err) console.error(err);
-  });
-  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
-});
-
-slackInteractions.action('stories', (payload,respond) => {
-  var reply = payload.actions[0].selected_options[0].value;
-  var options = {
-    token: process.env.botToken,
-    as_user: payload.user.name,
-    channel: payload.channel.id,
-    text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different story in the list."
-  }
-  bot.api.chat.postMessage(options, (err,res) => {
-    if (err) console.error(err);
-  });
-  // return "You have chosen: " + reply+ "\nHere's a list of learning strategies associated with this category.";
 });
 
 async function getUserData(userId,res) {
@@ -282,7 +255,9 @@ webserver.get('/home', function(req,res) {
 
   var normalizedPath = require("path").join(__dirname, "skills");
   require("fs").readdirSync(normalizedPath).forEach(function(file) {
-    require("./skills/" + file)(controller);
+    if (!file.includes("reflection_round)")) {
+      require("./skills/" + file)(controller, slackInteractions);
+    }
   });
 
 controller.hears(

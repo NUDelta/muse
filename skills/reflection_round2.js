@@ -1,3 +1,4 @@
+// TODO: Ask if they were working before starting this reflection
 module.exports = function(controller) {
   controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
     ["direct_mention", "mention", "direct_message", "ambient"],
@@ -42,7 +43,7 @@ module.exports = function(controller) {
             if (round1_docs.length > 0) {
               let most_recent = round1_docs[round1_docs.length-1];
               let res = most_recent.strategy;
-              convo.say("In your previous reflection session, you mentioned that " + res + " could help you.");
+              convo.say("In your previous reflection session, you mentioned that `" + res + "` could help you.");
               convo.next();
               convo.ask("How have you made progress towards applying that learning strategy, and how has that strategy helped you move closer to your goals?",
               (res,convo) => {
@@ -78,18 +79,23 @@ session? Did you feel the need to make any changes to your process? Why or why n
         convo.ask("Describe your main takeaways from this work session.",
         (res,convo) => {
           convo.next();
-        }, {'key': 'takeaways'})
+        }, {'key': 'takeaways'});
+
+        convo.ask("Were you working prior to completing this reflection?",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'in_action'});
 
         convo.say("Thanks for reflecting with me! I've recorded your responses!");
         convo.next();
 
-        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-        // var path = require('path');
-        //
-        // env(path.join(__dirname, '../.env'));
-        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-        //   usage_tip();
-        // }
+        var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+        var path = require('path');
+
+        env(path.join(__dirname, '../.env'));
+        if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+          usage_tip();
+        }
 
         var askTime = (convo,message) => {
           convo.ask("When can I ping you to reflect again?",

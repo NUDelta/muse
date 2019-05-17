@@ -93,7 +93,7 @@ a.button {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 70%;
+  width: 80%;
   @media (min-width: 576px) .history {
     padding: 1.5rem;
     margin-right: 0;
@@ -140,7 +140,7 @@ nav {
   border: none;
   outline: none;
   cursor: pointer;
-  padding: 14px 16px;
+  padding: 10px 10px;
   transition: 0.3s;
 }
 
@@ -173,7 +173,7 @@ nav {
 .strategies {
   margin-left: auto;
   margin-right: auto;
-  width: 70%;
+  width: 80%;
   margin-bottom: 3rem;
 }
 

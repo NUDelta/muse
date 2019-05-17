@@ -1,8 +1,75 @@
-module.exports = function(controller) {
+module.exports = function(controller,slackInteractions) {
   controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
+
       bot.createConversation(message,(err,convo) => {
+
+        var strategy_category, learning_strategy, story;
+        slackInteractions.action('strategy_categories', (payload,respond) => {
+          var reply = payload.actions[0].name;
+          strategy_category = reply;
+          var options = {
+            token: process.env.botToken,
+            as_user: payload.user.name,
+            channel: payload.channel.id,
+            text: reply
+            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different strategy in the list."
+          }
+          bot.api.chat.postMessage(options, (err,res) => {
+            if (err) console.error(err);
+          });
+          switch(reply) {
+            case "sprint planning and execution":
+              convo.gotoThread('sprints');
+              break;
+            case "documenting process/progress":
+              convo.gotoThread('docs');
+              break;
+            case "communication":
+              convo.gotoThread("communication");
+              break;
+            case "help seeking and giving":
+              convo.gotoThread("help");
+              break;
+            case "grit and growth":
+              convo.gotoThread("growth");
+              break;
+          }
+        });
+
+        slackInteractions.action('learning_strategies', (payload,respond) => {
+          var reply = payload.actions[0].name;
+          learning_strategy = reply;
+          var options = {
+            token: process.env.botToken,
+            as_user: payload.user.name,
+            channel: payload.channel.id,
+            text: reply
+            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different strategy in the list."
+          }
+          bot.api.chat.postMessage(options, (err,res) => {
+            if (err) console.error(err);
+          });
+          convo.gotoThread('q3');
+        });
+
+        slackInteractions.action('stories', (payload,respond) => {
+          var reply = payload.actions[0].selected_options[0].value;
+          story = reply;
+          var options = {
+            token: process.env.botToken,
+            as_user: payload.user.name,
+            channel: payload.channel.id,
+            text: reply
+            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different story in the list."
+          }
+          bot.api.chat.postMessage(options, (err,res) => {
+            if (err) console.error(err);
+          });
+          convo.gotoThread('story_reason');
+        });
+
         if (!err) {
           convo.activate();
           var startTime = new Date();
@@ -19,6 +86,17 @@ module.exports = function(controller) {
             }
           }
           setInterval(followUp,30*60000); // Not 30 min for some reason
+
+          convo.ask("Are you currently working on your DTR project?",
+          (res,convo) => {
+            if (res.text.toLowerCase().includes("no")) {
+              convo.say("Okay, let's reschedule your reflection.");
+              convo.gotoThread("reschedule");
+            }
+            else {
+              convo.next();
+            }
+          }, {'key': 'in_action'});
 
           convo.ask("What blocker are you currently struggling with? What did you go over during SIG to overcome this blocker?",
           (res,convo) => {
@@ -122,18 +200,18 @@ module.exports = function(controller) {
                       ]
                   }
               ]
-          }, (res,convo) => { convo.next() }, {'key': 'story'});
+          }, (res,convo) => { convo.gotoThread('story_reason'); } );
 
-          convo.ask("How will the story that you are currently working on help you overcome this blocker?",
+          convo.addQuestion("How will the story that you are currently working on help you overcome this blocker?",
           (res,convo) => {
-            convo.next();
-          }, {'key': 'story_reason'});
+            convo.gotoThread('strategy_categories');
+          }, {'key': 'story_reason'},'story_reason');
 
-          convo.ask({
+          convo.addQuestion({
             attachments: [
               {
                 title: "Select the learning strategy category that will help you overcome your blocker for this sprint. Recall what you went over with your mentors during SIG to choose.",
-                callback_id: "learning_strategies",
+                callback_id: "strategy_categories",
                 attachment_type: 'default',
                 actions: [
                   {
@@ -200,7 +278,7 @@ module.exports = function(controller) {
                 convo.gotoThread('growth');
               }
             }
-          ], {'key': 'strategy_category'});
+          ], {'key': 'strategy_category'},'strategy_categories');
 
           convo.addQuestion({
             attachments:[
@@ -402,13 +480,13 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
           }, {'key': 'recap'}, 'q4');
 
-        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-        // var path = require('path');
-        //
-        // env(path.join(__dirname, '../.env'));
-        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-        //   usage_tip();
-        // }
+        var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+        var path = require('path');
+
+        env(path.join(__dirname, '../.env'));
+        if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+          usage_tip();
+        }
 
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
@@ -463,34 +541,94 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.next();
           }, {'key': 'next_time'}, 'askTime');
 
+        convo.addQuestion("When should we reschedule your reflection?",
+          (res,convo) => {
+            var verifyTime = (res,convo,message) => {
+              const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
+              const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
+              convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
+                if (yes.includes(res2.text.toLowerCase())) {
+                  console.log("user replied yes");
+                  convo.say("Great, I'll send you a reminder then!");
+
+                  bot.api.reminders.add({
+                    token: process.env.oAuthToken,
+                    text: "Start reflection round 1 with <@muse>! Message `reflection round 1` to get started.",
+                    time: res.text,
+                    user: message.user
+                  }, (err,res) => {
+                    if (err) {
+                      convo.say("Sorry, I couldn't schedule the reminder. Try setting the time again. You can say, `in 5 min` or `tomorrow at 3pm`.");
+                      convo.next();
+                      convo.ask("When can I ping you again to complete the second round of reflection questions?",
+                      (res3,convo) => {
+                        convo.next();
+                        verifyTime(res3,convo,message);
+                      });
+                    }
+                  });
+                  convo.next();
+                }
+                else if (no.includes(res2.text.toLowerCase())) {
+                  console.log("user replied no");
+                  convo.next();
+                  convo.ask("When can I ping you to reflect?",
+                  (res3,convo) => {
+                    convo.next();
+                    verifyTime(res3,convo,message);
+                  });
+                }
+                else {
+                  convo.say("Sorry, I didn't understand that.");
+                  convo.next();
+                  convo.ask("When can I ping you to reflect?",
+                  (res3,convo) => {
+                    convo.next();
+                    verifyTime(res3,convo,message);
+                  });
+                }
+              }, {});
+            }
+
+            verifyTime(res,convo,message);
+            convo.next();
+          }, {'key': 'next_time'}, 'reschedule');
+
         convo.on('end',(convo) => {
           if (convo.status == 'completed') {
             // TODO: Set timeout for unfinished reflections
             var res = convo.extractResponses(); // Get the values for each reflection response
-            res.time = new Date();
-            res.round = 1;
-            res.id = message.user; // ID is Slack user ID
+            res.story = story;
+            res.strategy_category = strategy_category;
+            res.strategy = learning_strategy;
 
-            async function getUserName(obj,controller) {
-              let response = await bot.api.users.info({
-                token: process.env.oAuthToken,
-                user: message.user
-              }, (err,res) => {
-                if (err) console.error(err);
-                if (!err) {
-                  obj.userRealName = res.user.real_name;
-                  obj.userName = res.user.name;
-                  console.log(obj);
-                  controller.storage.users.save(obj);
-                }
-              });
-            }
-            try {
-              getUserName(res,controller);
-            }
-            catch (err) {
-              console.error(err);
-              controller.storage.users.save(res);
+            if (!res.in_action.toLowerCase().includes("no")) {
+              res.time = new Date();
+              res.round = 1;
+              res.id = message.user; // ID is Slack user ID
+
+              async function getUserName(obj,controller) {
+                let response = await bot.api.users.info({
+                  token: process.env.oAuthToken,
+                  user: message.user
+                }, (err,res) => {
+                  if (err) console.error(err);
+                  if (!err) {
+                    obj.userRealName = res.user.real_name;
+                    obj.userName = res.user.name;
+                    console.log(obj);
+                    controller.storage.users.save(obj);
+                  }
+                });
+              }
+              try {
+                getUserName(res,controller);
+              }
+              catch (err) {
+                console.error(err);
+                console.log(res);
+                controller.storage.users.save(res);
+              }
             }
           }
         });
