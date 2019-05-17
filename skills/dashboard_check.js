@@ -25,10 +25,16 @@ module.exports = function(controller) {
           convo.next();
         }, {'key': 'chart_check'});
 
-        convo.ask("Review your two last reflections. What stands out to you?",
+        convo.ask("Review your two last reflections. What stands out to you? Do you see any patterns in the strategies you apply?",
         (res,convo) => {
           convo.next();
         }, {'key': 'response_check'});
+
+        convo.ask("Are there specific strategies that you think are helpful for specific stories? If there are or are not, explain why.",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'strategy_check'});
+
       }
 
       var env = require('node-env-file'); // Needed for local build, comment out for Heroku
@@ -50,7 +56,7 @@ module.exports = function(controller) {
           // TODO: Set timeout for unfinished reflections
           var res = convo.extractResponses(); // Get the values for each reflection response
           res.time = new Date();
-          res.round = 2;
+          res.round = 3;
           res.id = message.user; // ID is Slack user ID
 
           async function getUserName(obj,controller) {

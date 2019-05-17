@@ -2,10 +2,21 @@ module.exports = function(controller,slackInteractions) {
   controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
+      var checkPrevReflections = async function(message) {
+        let res = await controller.storage.users.get(message.user, (err, user_data) => {
+          if (err) {
+            throw new Error("Request for reflection history could not be made.");
+          }
+          return user_data;
+        });
+        if (!Array.isArray(res)) {
+          res = [res];
+        }
+        return res;
+      }
 
       bot.createConversation(message,(err,convo) => {
-
-        var strategy_category, learning_strategy, story;
+        var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
         slackInteractions.action('strategy_categories', (payload,respond) => {
           var reply = payload.actions[0].name;
           strategy_category = reply;
@@ -41,6 +52,12 @@ module.exports = function(controller,slackInteractions) {
         slackInteractions.action('learning_strategies', (payload,respond) => {
           var reply = payload.actions[0].name;
           learning_strategy = reply;
+          if (learning_strategy === strategy_recommendation) {
+            rec_followed = true;
+          }
+          else {
+            rec_followed = false;
+          }
           var options = {
             token: process.env.botToken,
             as_user: payload.user.name,
@@ -67,6 +84,7 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
+
           convo.gotoThread('story_reason');
         });
 
@@ -141,7 +159,7 @@ module.exports = function(controller,slackInteractions) {
                                 },
                                 {
                                     "text": "conceptual contributions",
-                                    "value": "conceputal contributions"
+                                    "value": "conceptual contributions"
                                 },
                                 {
                                     "text": "approach tree",
@@ -161,7 +179,7 @@ module.exports = function(controller,slackInteractions) {
                                 },
                                 {
                                     "text": "presenting findings (poster, talk)",
-                                    "value": "presenting findings(poster, talk)"
+                                    "value": "presenting findings (poster, talk)"
                                 },
                                 {
                                     "text": "user testing/takeaways from user testing",
@@ -200,11 +218,51 @@ module.exports = function(controller,slackInteractions) {
                       ]
                   }
               ]
-          }, (res,convo) => { convo.gotoThread('story_reason'); } );
+          }, (res,convo) => {
+            convo.gotoThread('story_reason');
+          });
 
           convo.addQuestion("How will the story that you are currently working on help you overcome this blocker?",
           (res,convo) => {
-            convo.gotoThread('strategy_categories');
+            try {
+              console.log("checking previous reflections");
+              checkPrevReflections(message).then((pastReflections) => {
+                if (pastReflections.length > 0) { // Check if reflection history exists
+                  var round1_docs = pastReflections.filter((o) => {return o.round == 1;});
+                  if (round1_docs.length > 0) {
+                    var stories = round1_docs.filter((o) => {
+                      if (o.story === story) {
+                        console.log("stories match");
+                      }
+                      return o.story === story;
+                    });
+                    var story_strategies = {};
+                    for (var i = 0; i < stories.length; i++) {
+                      var key = stories[i].strategy;
+                      if (key in story_strategies) {
+                        story_strategies[key] += 1;
+                      }
+                      else {
+                        story_strategies[key] = 1;
+                      }
+                    }
+                    console.log(story_strategies);
+                    if (Object.keys(story_strategies).length > 0) {
+                      var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
+                      if (typeof most_common !== "undefined") {
+                        strategy_recommendation = most_common;
+                        bot.reply(message, "In the past, working on `" + most_common + "` has helped you with `" + story + "`. Maybe try this strategy again?");
+                      }
+                    }
+                  }
+                }
+                convo.gotoThread('strategy_categories');
+              });
+            }
+            catch(err) {
+              console.error(err);
+              convo.gotoThread('strategy_categories');
+            }
           }, {'key': 'story_reason'},'story_reason');
 
           convo.addQuestion({
@@ -334,7 +392,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
                   {
                     "name": "updating canvases",
                     "text": "1",
-                    "value": "updating research canvases",
+                    "value": "updating canvases",
                     "type": "button",
                   },
                   {
@@ -368,7 +426,7 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
                   {
                     "name": "availability",
                     "text": "2",
-                    "value": "updating design log",
+                    "value": "availability",
                     "type": "button",
                   }
                 ]
