@@ -261,11 +261,29 @@ webserver.get('/home', function(req,res) {
   });
 
 controller.hears(
-  ['hello', 'hi', 'greetings'], [
+  ['hello', 'hi', 'greetings', 'reflection commands', 'list commands'], [
     'direct_mention', 'mention', 'direct_message', 'ambient'],
     function (bot, message) {
-    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can say `start reflection`, `I want to reflect`, `reflection round 1`.");
+    bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can use the following commands:");
+    var begin = function() {bot.reply(message, "*beginning of work session*:    `start reflection`, `reflection round 1`");}
+    var end = function() {bot.reply(message, "*end of work session*:               `finish reflection`, `reflection round 2`");}
+    var check = function() {bot.reply(message, "*look at dashboard*:                  `dashboard check` to reflect while looking at https://muse-delta.herokuapp.com");}
+    var commands = function() {bot.reply(message, "*review commands*:                  `list commands`");}
+    var strategy_guide = function() {bot.reply(message, "*view strategy guide*:               `strategy guide`");}
+    var remind = function() {bot.reply(message, "*reflection reminder*:                `schedule reminder`")};
+    setTimeout(begin, 100);
+    setTimeout(end, 200);
+    setTimeout(check, 300);
+    setTimeout(commands, 400);
+    setTimeout(strategy_guide, 500);
+    setTimeout(remind, 600);
   }
+);
+
+controller.hears(['strategy guide'], ['direct_mention', 'mention', 'direct_message', 'ambient'],
+    function (bot, message) {
+      bot.reply(message, "You can view the strategy guide here https://docs.google.com/document/d/17667YjZhLv_MNkiJRBfLXM5LH95dfzbtZN-VSPykJyc/edit?usp=sharing");
+    }
 );
 
 function usage_tip() {

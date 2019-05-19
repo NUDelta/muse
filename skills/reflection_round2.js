@@ -76,7 +76,7 @@ session? Did you feel the need to make any changes to your process? Why or why n
         }, {'key': 'improvement'});
 
         // Question 4
-        convo.ask("Describe your main takeaways from this work session.",
+        convo.ask("Describe your main takeaways from this work session. How did Muse affect the ways you work?",
         (res,convo) => {
           convo.next();
         }, {'key': 'takeaways'});

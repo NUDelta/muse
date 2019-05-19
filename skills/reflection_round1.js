@@ -52,11 +52,13 @@ module.exports = function(controller,slackInteractions) {
         slackInteractions.action('learning_strategies', (payload,respond) => {
           var reply = payload.actions[0].name;
           learning_strategy = reply;
-          if (learning_strategy === strategy_recommendation) {
-            rec_followed = true;
-          }
-          else {
-            rec_followed = false;
+          if (typeof strategy_recommendation !== "undefined") {
+            if (learning_strategy === strategy_recommendation) {
+              rec_followed = true;
+            }
+            else {
+              rec_followed = false;
+            }
           }
           var options = {
             token: process.env.botToken,
@@ -68,7 +70,14 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          convo.gotoThread('q3');
+          if (typeof rec_followed !== "undefined") {
+            if (rec_followed === false) {
+              rec_ignored_reason(strategy_recommendation);
+            }
+          }
+          else {
+            convo.gotoThread('q3');
+          }
         });
 
         slackInteractions.action('stories', (payload,respond) => {
@@ -222,7 +231,7 @@ module.exports = function(controller,slackInteractions) {
             convo.gotoThread('story_reason');
           });
 
-          convo.addQuestion("How will the story that you are currently working on help you overcome this blocker?",
+          convo.addQuestion("How will the story that you are currently working on help you overcome this blocker? How do you intend to make progress on this story during this current work session?",
           (res,convo) => {
             try {
               console.log("checking previous reflections");
@@ -232,7 +241,6 @@ module.exports = function(controller,slackInteractions) {
                   if (round1_docs.length > 0) {
                     var stories = round1_docs.filter((o) => {
                       if (o.story === story) {
-                        console.log("stories match");
                       }
                       return o.story === story;
                     });
@@ -246,12 +254,11 @@ module.exports = function(controller,slackInteractions) {
                         story_strategies[key] = 1;
                       }
                     }
-                    console.log(story_strategies);
                     if (Object.keys(story_strategies).length > 0) {
                       var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
                       if (typeof most_common !== "undefined") {
                         strategy_recommendation = most_common;
-                        bot.reply(message, "In the past, working on `" + most_common + "` has helped you with `" + story + "`. Maybe try this strategy again?");
+                        bot.reply(message, "In the past, working on `" + strategy_recommendation + "` has helped you with `" + story + "`. Maybe try this strategy again?");
                       }
                     }
                   }
@@ -264,6 +271,14 @@ module.exports = function(controller,slackInteractions) {
               convo.gotoThread('strategy_categories');
             }
           }, {'key': 'story_reason'},'story_reason');
+
+          function rec_ignored_reason(strategy_recommendation) {
+            convo.addQuestion("Earlier I recommended that `"+strategy_recommendation+"` may help you. Why did you choose a different strategy? Your response to this question can help me make better recommendations in the future.",
+            (res,convo) => {
+              convo.gotoThread('q3');
+            }, {'key': 'rec_ignored_reason'},'rec_ignored');
+            convo.gotoThread('rec_ignored');
+          }
 
           convo.addQuestion({
             attachments: [
@@ -659,6 +674,9 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             res.story = story;
             res.strategy_category = strategy_category;
             res.strategy = learning_strategy;
+            if (typeof rec_followed !== "undefined") {
+              res.rec_followed = rec_followed;
+            }
 
             if (!res.in_action.toLowerCase().includes("no")) {
               res.time = new Date();
