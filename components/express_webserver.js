@@ -11,9 +11,9 @@ const { createMessageAdapter } = require('@slack/interactive-messages');
 
 module.exports = function(controller) {
     // var env = require('node-env-file'); // comment out for Heroku
-    path = require('path');
-    let reqPath = path.join(__dirname, '../.env');
-    env(reqPath);
+    // path = require('path');
+    // let reqPath = path.join(__dirname, '../.env');
+    // env(reqPath);
     const slackInteractions = createMessageAdapter(process.env.clientSigningSecret);
     var webserver = express();
     webserver.use(function(req, res, next) {
