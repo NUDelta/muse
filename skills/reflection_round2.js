@@ -76,15 +76,42 @@ session? Did you feel the need to make any changes to your process? Why or why n
         }, {'key': 'improvement'});
 
         // Question 4
-        convo.ask("Describe your main takeaways from this work session. How did Muse affect the ways you work?",
+        convo.ask("Describe your main takeaways from this work session.",
         (res,convo) => {
           convo.next();
         }, {'key': 'takeaways'});
+
+        convo.say("The following questions are for data collection to measure the ways Muse impacted how you work. Note that these are not reflection questions.");
 
         convo.ask("Were you working prior to completing this reflection?",
         (res,convo) => {
           convo.next();
         }, {'key': 'in_action'});
+
+        convo.ask("How do you usually work without Muse?",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'prior_work'});
+
+        convo.ask("How did Muse help you reflect on things that are relevant to this week?",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'relevancy'});
+
+        convo.ask("How did reflecting during a work session impact the way you work?",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'work_impact'});
+
+        convo.ask("On a scale of 1 to 5, how well did you apply the strategy you selected in your earlier reflection? (1=Not at all, 5=Extremely)",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'application_degree'});
+
+        convo.ask("On a scale of 1 to 5, how effective were you in terms of reaching the goals you set out for this work session? (1=Not at all, 5=Extremely)",
+        (res,convo) => {
+          convo.next();
+        }, {'key': 'effectiveness'});
 
         convo.say("Thanks for reflecting with me! I've recorded your responses!");
         convo.next();
