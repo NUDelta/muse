@@ -20,7 +20,7 @@ module.exports = function(controller) {
         }
         setInterval(followUp,30*60000); // Not 30 min for some reason
 
-        convo.ask("After taking a quick look at the data, how have you grown in the past week?",
+        convo.ask("After taking a quick look at the data, what strategies are you applying well, and what could you improve on?",
         (res,convo) => {
           convo.next();
         }, {'key': 'chart_check'});

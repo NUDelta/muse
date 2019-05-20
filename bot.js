@@ -1,10 +1,10 @@
 // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
-// env(__dirname + '/.env');
-// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-//   usage_tip();
-// }
+env(__dirname + '/.env');
+if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+  usage_tip();
+}
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
@@ -255,7 +255,11 @@ webserver.get('/home', function(req,res) {
 
   var normalizedPath = require("path").join(__dirname, "skills");
   require("fs").readdirSync(normalizedPath).forEach(function(file) {
-    if (!file.includes("reflection_round)")) {
+    if (!file.includes("reflection_round")) {
+      console.log(file);
+      require("./skills/" + file)(controller);
+    }
+    else {
       require("./skills/" + file)(controller, slackInteractions);
     }
   });
