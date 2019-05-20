@@ -89,13 +89,13 @@ session? Did you feel the need to make any changes to your process? Why or why n
         convo.say("Thanks for reflecting with me! I've recorded your responses!");
         convo.next();
 
-        var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
         var path = require('path');
 
-        env(path.join(__dirname, '../.env'));
-        if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-          usage_tip();
-        }
+        // env(path.join(__dirname, '../.env'));
+        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+        //   usage_tip();
+        // }
 
         var askTime = (convo,message) => {
           convo.ask("When can I ping you to reflect again?",

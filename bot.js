@@ -1,4 +1,4 @@
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
 env(__dirname + '/.env');

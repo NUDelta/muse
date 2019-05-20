@@ -553,13 +553,13 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
           }, {'key': 'recap'}, 'q4');
 
-        var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
         var path = require('path');
 
-        env(path.join(__dirname, '../.env'));
-        if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-          usage_tip();
-        }
+        // env(path.join(__dirname, '../.env'));
+        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+        //   usage_tip();
+        // }
 
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
