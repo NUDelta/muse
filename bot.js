@@ -1,10 +1,10 @@
 // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
-env(__dirname + '/.env');
-if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-  usage_tip();
-}
+// env(__dirname + '/.env');
+// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+//   usage_tip();
+// }
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
