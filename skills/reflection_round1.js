@@ -552,15 +552,7 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.gotoThread('askTime');
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
           }, {'key': 'recap'}, 'q4');
-
-        // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-        var path = require('path');
-
-        // env(path.join(__dirname, '../.env'));
-        // if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-        //   usage_tip();
-        // }
-
+          
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
             var verifyTime = (res,convo,message) => {
@@ -679,7 +671,7 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             }
 
             if (!res.in_action.toLowerCase().includes("no")) {
-              res.time = new Date();
+              res.time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
               res.round = 1;
               res.id = message.user; // ID is Slack user ID
 

@@ -32,17 +32,10 @@ module.exports = function(controller) {
 
         convo.ask("Are there specific strategies that you think are helpful for specific stories? If there are or are not, explain why.",
         (res,convo) => {
+          convo.say("Thanks for completing your reflection with me!");
           convo.next();
         }, {'key': 'strategy_check'});
 
-      }
-
-      var env = require('node-env-file'); // Needed for local build, comment out for Heroku
-      var path = require('path');
-
-      env(path.join(__dirname, '../.env'));
-      if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-        usage_tip();
       }
 
       async function getUserData(userId,res) {
@@ -55,7 +48,7 @@ module.exports = function(controller) {
         if (convo.status == 'completed') {
           // TODO: Set timeout for unfinished reflections
           var res = convo.extractResponses(); // Get the values for each reflection response
-          res.time = new Date();
+          res.time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
           res.round = 3;
           res.id = message.user; // ID is Slack user ID
 
@@ -69,6 +62,7 @@ module.exports = function(controller) {
                 obj.userRealName = res.user.real_name;
                 obj.userName = res.user.name;
                 console.log(obj);
+                console.log("saving reflection");
                 controller.storage.users.save(obj);
               }
             });
