@@ -200,3 +200,14 @@ p {
   margin-block-end: inherit;
   margin-bottom: 15px;
 }
+
+.chart_key {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-left: 1.25rem;
+  padding-right:1.25rem;
+}
+
+.chart_key > p {
+  font-size: 0.75rem;
+}
