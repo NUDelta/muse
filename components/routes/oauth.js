@@ -117,10 +117,6 @@ module.exports = function(webserver, controller) {
                         b = new Date(b.time);
                         return a>b ? -1 : a<b ? 1 : 0;
                       })
-                      data = data.map(obj => {
-                        obj.time = new Date(obj.time).toLocaleString();
-                        return obj;
-                      });
                       var user = data[0].userRealName.split(' ')[0];
                       var strategies = getStrategies(data);
 
