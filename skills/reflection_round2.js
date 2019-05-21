@@ -1,6 +1,6 @@
 // TODO: Ask if they were working before starting this reflection
 module.exports = function(controller) {
-  controller.hears(["finish reflection", "reflection round 2", "reflection 2"],
+  controller.hears(["finish reflection(.*)", "reflection round 2", "reflection 2"],
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       var checkPrevReflections = async function(message) {
@@ -121,8 +121,8 @@ session? Did you feel the need to make any changes to your process? Why or why n
             (res,convo) => {
 
               var verifyTime = (res,convo,message) => {
-                const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
-                const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
+                const yes = ['yes(.*)', 'ya(.*)', 'sure(.*)', 'maybe(.*)', 'i think(.*)', 'why not(.*)', 'yeah(.*)', 'yup(.*)', 'ok(.*)']
+                const no = ['no(.*)', 'nah(.*)', 'nope(.*)', 'hell naw(.*)', 'no way(.*)']
                 convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
                   if (yes.includes(res2.text.toLowerCase())) {
                     console.log("user replied yes");

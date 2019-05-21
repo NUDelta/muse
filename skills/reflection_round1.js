@@ -1,5 +1,5 @@
 module.exports = function(controller,slackInteractions) {
-  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
+  controller.hears(["start reflection(.*)", "I want to reflect(.*)", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       var checkPrevReflections = async function(message) {
@@ -30,23 +30,24 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          switch(reply) {
-            case "sprint planning and execution":
-              convo.gotoThread('sprints');
-              break;
-            case "documenting process/progress":
-              convo.gotoThread('docs');
-              break;
-            case "communication":
-              convo.gotoThread("communication");
-              break;
-            case "help seeking and giving":
-              convo.gotoThread("help");
-              break;
-            case "grit and growth":
-              convo.gotoThread("growth");
-              break;
-          }
+          convo.next();
+          // switch(reply) {
+          //   case "sprint planning and execution":
+          //     convo.gotoThread('sprints');
+          //     break;
+          //   case "documenting process/progress":
+          //     convo.gotoThread('docs');
+          //     break;
+          //   case "communication":
+          //     convo.gotoThread("communication");
+          //     break;
+          //   case "help seeking and giving":
+          //     convo.gotoThread("help");
+          //     break;
+          //   case "grit and growth":
+          //     convo.gotoThread("growth");
+          //     break;
+          // }
         });
 
         slackInteractions.action('learning_strategies', (payload,respond) => {
@@ -70,14 +71,15 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          if (typeof rec_followed !== "undefined") {
-            if (rec_followed === false) {
-              rec_ignored_reason(strategy_recommendation);
-            }
-          }
-          else {
-            convo.gotoThread('q3');
-          }
+          convo.next();
+          // if (typeof rec_followed !== "undefined") {
+          //   if (rec_followed === false) {
+          //     rec_ignored_reason(strategy_recommendation);
+          //   }
+          // }
+          // else {
+          //   convo.gotoThread('q3');
+          // }
         });
 
         slackInteractions.action('stories', (payload,respond) => {
@@ -93,8 +95,8 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-
-          convo.gotoThread('story_reason');
+          convo.next();
+          // convo.gotoThread('story_reason');
         });
 
         if (!err) {
@@ -229,7 +231,7 @@ module.exports = function(controller,slackInteractions) {
               ]
           }, (res,convo) => {
             convo.gotoThread('story_reason');
-          });
+          }, {'key': 'story'});
 
           convo.addQuestion("How will the story that you are currently working on help you overcome this blocker? How do you intend to make progress on this story during this current work session?",
           (res,convo) => {
@@ -392,7 +394,14 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
                 ]
               }
             ]},function(response,convo) {
-            convo.gotoThread('q3')
+              if (typeof rec_followed !== "undefined") {
+                if (rec_followed === false) {
+                  rec_ignored_reason(strategy_recommendation);
+                }
+              }
+              else {
+                convo.gotoThread('q3');
+              }
           },{'key': 'strategy'},'sprints');
 
           convo.addQuestion({
@@ -420,7 +429,14 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q3');
+            if (typeof rec_followed !== "undefined") {
+              if (rec_followed === false) {
+                rec_ignored_reason(strategy_recommendation);
+              }
+            }
+            else {
+              convo.gotoThread('q3');
+            }
           },{'key': 'strategy'},'docs');
 
           convo.addQuestion({
@@ -448,7 +464,14 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q3');
+            if (typeof rec_followed !== "undefined") {
+              if (rec_followed === false) {
+                rec_ignored_reason(strategy_recommendation);
+              }
+            }
+            else {
+              convo.gotoThread('q3');
+            }
           },{'key': 'strategy'},'communication');
 
           convo.addQuestion({
@@ -490,7 +513,14 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            convo.gotoThread('q3');
+            if (typeof rec_followed !== "undefined") {
+              if (rec_followed === false) {
+                rec_ignored_reason(strategy_recommendation);
+              }
+            }
+            else {
+              convo.gotoThread('q3');
+            }
           },{'key': 'strategy'},'help');
 
           convo.addQuestion({
@@ -539,7 +569,14 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             }
           ]
           },function(response,convo) {
-            convo.gotoThread('q3')
+            if (typeof rec_followed !== "undefined") {
+              if (rec_followed === false) {
+                rec_ignored_reason(strategy_recommendation);
+              }
+            }
+            else {
+              convo.gotoThread('q3');
+            }
           },{'key': 'strategy'},'growth');
 
         convo.addQuestion('How will working on this strategy help you accomplish your goals?',function(response,convo) {
@@ -552,12 +589,12 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             convo.gotoThread('askTime');
             convo.say("Thanks for reflecting with me! I've recorded your responses!")
           }, {'key': 'recap'}, 'q4');
-          
+
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
             var verifyTime = (res,convo,message) => {
-              const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok']
-              const no = ['no', 'nah', 'nope', 'hell naw', 'no way']
+              const yes = ['yes(.*)', 'ya(.*)', 'sure(.*)', 'maybe(.*)', 'i think(.*)', 'why not(.*)', 'yeah(.*)', 'yup(.*)', 'ok(.*)']
+              const no = ['no(.*)', 'nah(.*)', 'nope(.*)', 'hell naw(.*)', 'no way(.*)']
               convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
                 if (yes.includes(res2.text.toLowerCase())) {
                   console.log("user replied yes");
@@ -663,6 +700,9 @@ the need to adjust your direction? Explain why, and if you need to make changes,
           if (convo.status == 'completed') {
             // TODO: Set timeout for unfinished reflections
             var res = convo.extractResponses(); // Get the values for each reflection response
+            console.log(story);
+            console.log(strategy_category);
+            console.log(strategy);
             res.story = story;
             res.strategy_category = strategy_category;
             res.strategy = learning_strategy;

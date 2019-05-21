@@ -90,15 +90,20 @@ module.exports = function(webserver, controller) {
                         Object.keys(obj).forEach((key,index) => {
                           if (key === 'strategy_category') {
                             let res = obj[key];
-                            res = res.toLowerCase();
-                            counts[res] += 1; // TODO: Specify sprint of timestamp
-                            categories.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
-                            strategy_counts[res][obj.strategy.toLowerCase()] += 1;
+                            if (res !== null) {
+                              res = res.toLowerCase();
+                              counts[res] += 1; // TODO: Specify sprint of timestamp
+                              categories.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+                              strategy_counts[res][obj.strategy.toLowerCase()] += 1;
+                            }
+
                           }
                           if (key === 'strategy') {
                             let res = obj[key];
-                            res = res.toLowerCase();
-                            specific_strategies.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+                            if (res !== null) {
+                              res = res.toLowerCase();
+                              specific_strategies.push({response: res, time: obj.time, story: obj.story.toLowerCase()});
+                            }
                           }
                         });
                       });
