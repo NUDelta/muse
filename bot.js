@@ -261,7 +261,7 @@ webserver.get('/home', function(req,res) {
   });
 
 controller.hears(
-  ['hello', 'hi', 'greetings', 'reflection commands', 'list commands'], [
+  ['hello(.*)', 'hi(.*)', 'greetings', 'reflection commands', 'list commands'], [
     'direct_mention', 'mention', 'direct_message', 'ambient'],
     function (bot, message) {
     bot.reply(message, "Hello! I'm Muse, your friendly reflection bot! If you'd like to reflect with me, you can use the following commands:");
