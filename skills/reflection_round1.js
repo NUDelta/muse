@@ -2,7 +2,6 @@ module.exports = function(controller,slackInteractions) {
   controller.hears(["start reflection(.*)", "I want to reflect(.*)", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
-      var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
 
       var checkPrevReflections = async function(message) {
         let res = await controller.storage.users.get(message.user, (err, user_data) => {
@@ -31,7 +30,6 @@ module.exports = function(controller,slackInteractions) {
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          console.log("should enter switch case");
           switch(reply) {
             case "sprint planning and execution":
               convo.gotoThread('sprints');
@@ -50,9 +48,11 @@ module.exports = function(controller,slackInteractions) {
               break;
           }
         });
+        return reply;
       }
 
       function learningStrategies(convo) {
+        var rec_followed;
         slackInteractions.action('learning_strategies', (payload,respond) => {
           var reply = payload.actions[0].name;
           learning_strategy = reply;
@@ -83,6 +83,7 @@ module.exports = function(controller,slackInteractions) {
             convo.gotoThread('q3');
           }
         });
+        return [reply, rec_followed];
       }
 
       function stories(convo) {
@@ -101,12 +102,15 @@ module.exports = function(controller,slackInteractions) {
           });
           convo.gotoThread('story_reason');
         });
+        return reply;
       }
 
       bot.createConversation(message,(err,convo) => {
-        strategyCategories(convo);
-        learningStrategies(convo);
-        stories(convo);
+        var strategy_category = strategyCategories(convo);
+        var strategyResponse = learningStrategies(convo);
+        var learning_strategy = strategyResponse[0];
+        var rec_followed = strategy_response[1];
+        var story = stories(convo);
 
         if (!err) {
           convo.activate();
@@ -267,9 +271,9 @@ module.exports = function(controller,slackInteractions) {
                     }
                     if (Object.keys(story_strategies).length > 0) {
                       var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
-                      if ((typeof most_common !== "undefined") && (typeof story !== "undefined")) {
+                      if (typeof most_common !== "undefined") {
                         strategy_recommendation = most_common;
-                        bot.reply(message, "In the past, working on `" + strategy_recommendation + "` has helped you with `" + story + "`. Maybe try this strategy again?");
+                        bot.reply(message, "In the past, working on `" + most_common + "` has helped you with the story you chose earlier. Maybe try this strategy again?");
                       }
                     }
                   }
