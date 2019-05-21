@@ -1,5 +1,5 @@
 module.exports = function(controller,slackInteractions) {
-  controller.hears(["start reflection(.*)", "I want to reflect(.*)", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
+  controller.hears(["start reflection", "I want to reflect", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
       var checkPrevReflections = async function(message) {
@@ -21,6 +21,7 @@ module.exports = function(controller,slackInteractions) {
 
       bot.createConversation(message,(err,convo) => {
         var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
+
         slackInteractions.action('strategy_categories', (payload,respond) => {
           var reply = payload.actions[0].name;
           strategy_category = reply;
@@ -240,6 +241,8 @@ module.exports = function(controller,slackInteractions) {
             try {
               console.log("checking previous reflections");
               checkPrevReflections(message).then((pastReflections) => {
+                var responses = convo.extractResponses();
+                var story = responses.story;
                 if (pastReflections.length > 0) { // Check if reflection history exists
                   var round1_docs = pastReflections.filter((o) => {return o.round == 1;});
                   if (round1_docs.length > 0) {
@@ -262,7 +265,7 @@ module.exports = function(controller,slackInteractions) {
                       var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
                       if (typeof most_common !== "undefined") {
                         strategy_recommendation = most_common;
-                        bot.reply(message, "In the past, working on `" + most_common + "` has helped you with the story you selected above. Maybe try this strategy again?");
+                        bot.reply(message, "In the past, working on `" + most_common + "` has helped you with `"+story+"`. Maybe try this strategy again?");
                       }
                     }
                   }
