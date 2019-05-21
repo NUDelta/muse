@@ -2,6 +2,8 @@ module.exports = function(controller,slackInteractions) {
   controller.hears(["start reflection(.*)", "I want to reflect(.*)", "reflection round 1", "reflection 1", "reflection round one", "begin reflection", "I want to reflect!"], // Make regex to match all similar strings
     ["direct_mention", "mention", "direct_message", "ambient"],
     (bot,message) => {
+      var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
+
       var checkPrevReflections = async function(message) {
         let res = await controller.storage.users.get(message.user, (err, user_data) => {
           if (err) {
@@ -15,8 +17,7 @@ module.exports = function(controller,slackInteractions) {
         return res;
       }
 
-      bot.createConversation(message,(err,convo) => {
-        var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
+      function strategyCategories(convo) {
         slackInteractions.action('strategy_categories', (payload,respond) => {
           var reply = payload.actions[0].name;
           strategy_category = reply;
@@ -49,7 +50,9 @@ module.exports = function(controller,slackInteractions) {
               break;
           }
         });
+      }
 
+      function learningStrategies(convo) {
         slackInteractions.action('learning_strategies', (payload,respond) => {
           var reply = payload.actions[0].name;
           learning_strategy = reply;
@@ -80,7 +83,9 @@ module.exports = function(controller,slackInteractions) {
             convo.gotoThread('q3');
           }
         });
+      }
 
+      function stories(convo) {
         slackInteractions.action('stories', (payload,respond) => {
           var reply = payload.actions[0].selected_options[0].value;
           story = reply;
@@ -96,6 +101,12 @@ module.exports = function(controller,slackInteractions) {
           });
           convo.gotoThread('story_reason');
         });
+      }
+
+      bot.createConversation(message,(err,convo) => {
+        strategyCategories(convo);
+        learningStrategies(convo);
+        stories(convo);
 
         if (!err) {
           convo.activate();
@@ -256,7 +267,7 @@ module.exports = function(controller,slackInteractions) {
                     }
                     if (Object.keys(story_strategies).length > 0) {
                       var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
-                      if (typeof most_common !== "undefined") {
+                      if ((typeof most_common !== "undefined") && (typeof story !== "undefined")) {
                         strategy_recommendation = most_common;
                         bot.reply(message, "In the past, working on `" + strategy_recommendation + "` has helped you with `" + story + "`. Maybe try this strategy again?");
                       }
