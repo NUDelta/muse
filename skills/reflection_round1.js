@@ -24,30 +24,30 @@ module.exports = function(controller,slackInteractions) {
             token: process.env.botToken,
             as_user: payload.user.name,
             channel: payload.channel.id,
-            text: reply
-            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different strategy in the list."
+            // text: reply
+            text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          convo.next();
-          // switch(reply) {
-          //   case "sprint planning and execution":
-          //     convo.gotoThread('sprints');
-          //     break;
-          //   case "documenting process/progress":
-          //     convo.gotoThread('docs');
-          //     break;
-          //   case "communication":
-          //     convo.gotoThread("communication");
-          //     break;
-          //   case "help seeking and giving":
-          //     convo.gotoThread("help");
-          //     break;
-          //   case "grit and growth":
-          //     convo.gotoThread("growth");
-          //     break;
-          // }
+          console.log("should enter switch case");
+          switch(reply) {
+            case "sprint planning and execution":
+              convo.gotoThread('sprints');
+              break;
+            case "documenting process/progress":
+              convo.gotoThread('docs');
+              break;
+            case "communication":
+              convo.gotoThread("communication");
+              break;
+            case "help seeking and giving":
+              convo.gotoThread("help");
+              break;
+            case "grit and growth":
+              convo.gotoThread("growth");
+              break;
+          }
         });
 
         slackInteractions.action('learning_strategies', (payload,respond) => {
@@ -65,21 +65,20 @@ module.exports = function(controller,slackInteractions) {
             token: process.env.botToken,
             as_user: payload.user.name,
             channel: payload.channel.id,
-            text: reply
-            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different strategy in the list."
+            // text: reply
+            text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          convo.next();
-          // if (typeof rec_followed !== "undefined") {
-          //   if (rec_followed === false) {
-          //     rec_ignored_reason(strategy_recommendation);
-          //   }
-          // }
-          // else {
-          //   convo.gotoThread('q3');
-          // }
+          if (typeof rec_followed !== "undefined") {
+            if (rec_followed === false) {
+              rec_ignored_reason(strategy_recommendation);
+            }
+          }
+          else {
+            convo.gotoThread('q3');
+          }
         });
 
         slackInteractions.action('stories', (payload,respond) => {
@@ -89,14 +88,13 @@ module.exports = function(controller,slackInteractions) {
             token: process.env.botToken,
             as_user: payload.user.name,
             channel: payload.channel.id,
-            text: reply
-            // text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message. Otherwise, reply with a different story in the list."
+            // text: reply
+            text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
           });
-          convo.next();
-          // convo.gotoThread('story_reason');
+          convo.gotoThread('story_reason');
         });
 
         if (!err) {
@@ -702,10 +700,16 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             var res = convo.extractResponses(); // Get the values for each reflection response
             console.log(story);
             console.log(strategy_category);
-            console.log(strategy);
-            res.story = story;
-            res.strategy_category = strategy_category;
-            res.strategy = learning_strategy;
+            console.log(learning_strategy);
+            if (typeof story !== "undefined") {
+              res.story = story;
+            }
+            if (typeof strategy_category !== "undefined") {
+              res.strategy_category = strategy_category;
+            }
+            if (typeof learning_strategy !== "undefined") {
+              res.strategy = learning_strategy;
+            }
             if (typeof rec_followed !== "undefined") {
               res.rec_followed = rec_followed;
             }
