@@ -591,8 +591,8 @@ the need to adjust your direction? Explain why, and if you need to make changes,
         convo.addQuestion("When can I ping you again to complete the second round of reflection questions?",
           (res,convo) => {
             var verifyTime = (res,convo,message) => {
-              const yes = ['yes(.*)', 'ya(.*)', 'sure(.*)', 'maybe(.*)', 'i think(.*)', 'why not(.*)', 'yeah(.*)', 'yup(.*)', 'ok(.*)']
-              const no = ['no(.*)', 'nah(.*)', 'nope(.*)', 'hell naw(.*)', 'no way(.*)']
+              const yes = ['yes', 'ya', 'sure', 'maybe', 'i think', 'why not', 'yeah', 'yup', 'ok', 'yes!', 'yes.']
+              const no = ['no', 'nah', 'nope', 'hell naw', 'no way', 'no!', 'no']
               convo.ask(`Ok, so here's when I'll ping you to reflect: ${res.text} - is that ok?`,(res2,convo) => {
                 if (yes.includes(res2.text.toLowerCase())) {
                   console.log("user replied yes");
