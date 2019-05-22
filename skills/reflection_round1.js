@@ -15,91 +15,110 @@ module.exports = function(controller,slackInteractions) {
         return res;
       }
 
-      function strategyCategories(convo) {
-
-      }
-
       bot.createConversation(message,(err,convo) => {
         var strategy_category, learning_strategy, story, strategy_recommendation, rec_followed;
-
-        slackInteractions.action('strategy_categories', (payload,respond) => {
-          var reply = payload.actions[0].name;
-          strategy_category = reply;
-          var options = {
-            token: process.env.botToken,
-            as_user: payload.user.name,
-            channel: payload.channel.id,
-            // text: reply
-            text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
-          }
-          bot.api.chat.postMessage(options, (err,res) => {
-            if (err) console.error(err);
-          });
-          console.log("should enter switch case");
-          switch(reply) {
-            case "sprint planning and execution":
-              convo.gotoThread('sprints');
-              break;
-            case "documenting process/progress":
-              convo.gotoThread('docs');
-              break;
-            case "communication":
-              convo.gotoThread("communication");
-              break;
-            case "help seeking and giving":
-              convo.gotoThread("help");
-              break;
-            case "grit and growth":
-              convo.gotoThread("growth");
-              break;
-          }
-        });
 
         slackInteractions.action('learning_strategies', (payload,respond) => {
           var reply = payload.actions[0].name;
           learning_strategy = reply;
-          if (typeof strategy_recommendation !== "undefined") {
-            if (learning_strategy === strategy_recommendation) {
-              rec_followed = true;
-            }
-            else {
-              rec_followed = false;
-            }
-          }
+          console.log("should post reply");
           var options = {
             token: process.env.botToken,
             as_user: payload.user.name,
             channel: payload.channel.id,
+            // text: "You have chosen `"+reply+"`. Please answer the question above."
             // text: reply
             text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
+            // if (!err) {
+            //   if (typeof rec_followed !== "undefined") {
+            //     if (rec_followed === false) {
+            //       rec_ignored_reason(strategy_recommendation);
+            //     }
+            //   }
+            //   else {
+            //     convo.gotoThread('q3');
+            //   }
+            // }
           });
-          if (typeof rec_followed !== "undefined") {
-            if (rec_followed === false) {
-              rec_ignored_reason(strategy_recommendation);
+          convo.setVar('strategy',reply);
+          if ("strategy_recommendation" in convo.vars) {
+            console.log("looking for strategy recommendation in button callback");
+            if (typeof convo.vars.strategy_recommendation !== "undefined") {
+              console.log("strategy_recommendation not undefined");
+              console.log(strategy_recommendation);
+              if (learning_strategy === strategy_recommendation) {
+                rec_followed = true;
+                console.log("setting rec_followed to true");
+                convo.setVar('rec_followed',true);
+              }
+              else {
+                rec_followed = false;
+                console.log("setting rec_followed to false");
+                convo.setVar('rec_followed',false);j
+              }
+            }
+            else {
+              console.log("looks like strategy rec undefined");
             }
           }
-          else {
-            convo.gotoThread('q3');
+        });
+
+        slackInteractions.action('strategy_categories', async(payload,respond) => {
+          var reply = payload.actions[0].name;
+          strategy_category = reply;
+          convo.setVar('strategy_category',reply);
+          var options = {
+            token: process.env.botToken,
+            as_user: payload.user.name,
+            channel: payload.channel.id,
+            // text: reply
+            // text: "You have chosen `"+reply+"`. Please answer the question above."
+            text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
+          bot.api.chat.postMessage(options, (err,res) => {
+            console.log(reply);
+            // for whatever reason this doesn't run
+            // switch(reply) {
+            //   case "sprint planning and execution":
+            //     convo.gotoThread('sprints');
+            //     break;
+            //   case "documenting process/progress":
+            //     convo.gotoThread('docs');
+            //     break;
+            //   case "communication":
+            //     convo.gotoThread("communication");
+            //     break;
+            //   case "help seeking and giving":
+            //     convo.gotoThread("help");
+            //     break;
+            //   case "grit and growth":
+            //     convo.gotoThread("growth");
+            //     break;
+            // }
+            if (err) console.error(err);
+          });
         });
 
         slackInteractions.action('stories', (payload,respond) => {
           var reply = payload.actions[0].selected_options[0].value;
+          convo.setVar("story", reply);
           story = reply;
           var options = {
             token: process.env.botToken,
             as_user: payload.user.name,
             channel: payload.channel.id,
             // text: reply
+            // text: "You have chosen `"+reply+"`. Please answer the question above."
             text: "You have chosen `" + reply + "`. If that is correct, reply `" + reply + "` to this message if you do not receive the next question automatically."
           }
           bot.api.chat.postMessage(options, (err,res) => {
             if (err) console.error(err);
+            // console.log("should go to next thread");
+            // convo.gotoThread('story_reason');
           });
-          convo.gotoThread('story_reason');
         });
 
         if (!err) {
@@ -132,10 +151,11 @@ module.exports = function(controller,slackInteractions) {
 
           convo.ask("What blocker are you currently struggling with? What did you go over during SIG to overcome this blocker?",
           (res,convo) => {
-            convo.next();
+            // convo.next();
+            convo.gotoThread("story_thread");
           }, {'key': 'blocker'});
 
-          convo.ask({
+          convo.addQuestion({
               attachments:[
                   {
                       title: 'Choose the item that corresponds best to the sprint story you are currently working on.',
@@ -232,17 +252,23 @@ module.exports = function(controller,slackInteractions) {
                       ]
                   }
               ]
-          }, (res,convo) => {
+          },
+          (res,convo) => {
+            convo.setVar('story',res);
             convo.gotoThread('story_reason');
-          }, {'key': 'story'});
+          }, {'key': 'story'}, "story_thread");
 
           convo.addQuestion("How will the story that you are currently working on help you overcome this blocker? How do you intend to make progress on this story during this current work session?",
           (res,convo) => {
             try {
               console.log("checking previous reflections");
               checkPrevReflections(message).then((pastReflections) => {
-                var responses = convo.extractResponses();
-                var story = responses.story;
+                console.log("story: ", story);
+                if (typeof story === "undefined") {
+                  console.log("story is undefined");
+                  var responses = convo.extractResponses();
+                  story = responses.story;
+                }
                 if (pastReflections.length > 0) { // Check if reflection history exists
                   var round1_docs = pastReflections.filter((o) => {return o.round == 1;});
                   if (round1_docs.length > 0) {
@@ -265,6 +291,9 @@ module.exports = function(controller,slackInteractions) {
                       var most_common = Object.keys(story_strategies).reduce((a,b) => story_strategies[a] > story_strategies[b] ? a : b);
                       if (typeof most_common !== "undefined") {
                         strategy_recommendation = most_common;
+                        convo.setVar("strategy_recommendation", most_common);
+                        console.log("convo.vars: ", convo.vars);
+                        console.log("most common ",most_common);
                         bot.reply(message, "In the past, working on `" + most_common + "` has helped you with `"+story+"`. Maybe try this strategy again?");
                       }
                     }
@@ -280,6 +309,7 @@ module.exports = function(controller,slackInteractions) {
           }, {'key': 'story_reason'},'story_reason');
 
           function rec_ignored_reason(strategy_recommendation) {
+            console.log("strategy rec ",strategy_recommendation);
             convo.addQuestion("Earlier I recommended that `"+strategy_recommendation+"` may help you. Why did you choose a different strategy? Your response to this question can help me make better recommendations in the future.",
             (res,convo) => {
               convo.gotoThread('q3');
@@ -399,9 +429,13 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
                 ]
               }
             ]},function(response,convo) {
-              if (typeof rec_followed !== "undefined") {
-                if (rec_followed === false) {
-                  rec_ignored_reason(strategy_recommendation);
+              if ("strategy_recommendation" in convo.vars) {
+                if (convo.vars.strategy_recommendation !== response) {
+                  rec_ignored_reason(convo.vars.strategy_recommendation)
+                  convo.setVar("rec_followed",false);
+                }
+                else {
+                  convo.setVar("rec_followed",true);
                 }
               }
               else {
@@ -434,9 +468,13 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            if (typeof rec_followed !== "undefined") {
-              if (rec_followed === false) {
-                rec_ignored_reason(strategy_recommendation);
+            if ("strategy_recommendation" in convo.vars) {
+              if (convo.vars.strategy_recommendation !== response) {
+                rec_ignored_reason(convo.vars.strategy_recommendation)
+                convo.setVar("rec_followed",false);
+              }
+              else {
+                convo.setVar("rec_followed",true);
               }
             }
             else {
@@ -469,9 +507,13 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            if (typeof rec_followed !== "undefined") {
-              if (rec_followed === false) {
-                rec_ignored_reason(strategy_recommendation);
+            if ("strategy_recommendation" in convo.vars) {
+              if (convo.vars.strategy_recommendation !== response) {
+                rec_ignored_reason(convo.vars.strategy_recommendation)
+                convo.setVar("rec_followed",false);
+              }
+              else {
+                convo.setVar("rec_followed",true);
               }
             }
             else {
@@ -518,9 +560,13 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
               }
             ]
           },function(response,convo) {
-            if (typeof rec_followed !== "undefined") {
-              if (rec_followed === false) {
-                rec_ignored_reason(strategy_recommendation);
+            if ("strategy_recommendation" in convo.vars) {
+              if (convo.vars.strategy_recommendation !== response) {
+                rec_ignored_reason(convo.vars.strategy_recommendation)
+                convo.setVar("rec_followed",false);
+              }
+              else {
+                convo.setVar("rec_followed",true);
               }
             }
             else {
@@ -574,15 +620,33 @@ in each sprint and will not "overcrank" to attempt to get things done and instea
             }
           ]
           },function(response,convo) {
-            if (typeof rec_followed !== "undefined") {
-              if (rec_followed === false) {
-                rec_ignored_reason(strategy_recommendation);
+            if ("strategy_recommendation" in convo.vars) {
+              if (convo.vars.strategy_recommendation !== response) {
+                rec_ignored_reason(convo.vars.strategy_recommendation)
+                convo.setVar("rec_followed",false);
+              }
+              else {
+                convo.setVar("rec_followed",true);
               }
             }
             else {
               convo.gotoThread('q3');
             }
           },{'key': 'strategy'},'growth');
+
+        // convo.beforeThread('q3', (convo, next) => {
+        //   console.log("convo.vars before thread ", convo.vars);
+        //   console.log("strategy recommendation from convo.vars ",convo.vars.strategy_recommendation);
+        //   if ("rec_followed" in convo.vars) {
+        //     console.log("rec_followed from convo.vars ",convo.vars.rec_followed);
+        //     if (typeof convo.vars.rec_followed !== "undefined") {
+        //       rec_ignored_reason(convo.vars.strategy_recommendation);
+        //     }
+        //   }
+        //   else {
+        //     next();
+        //   }
+        // });
 
         convo.addQuestion('How will working on this strategy help you accomplish your goals?',function(response,convo) {
           convo.gotoThread('q4');
@@ -704,21 +768,11 @@ the need to adjust your direction? Explain why, and if you need to make changes,
         convo.on('end',(convo) => {
           if (convo.status == 'completed') {
             // TODO: Set timeout for unfinished reflections
+            console.log("printing convo vars ",convo.vars);
             var res = convo.extractResponses(); // Get the values for each reflection response
-            console.log(story);
-            console.log(strategy_category);
-            console.log(learning_strategy);
-            if (typeof story !== "undefined") {
-              res.story = story;
-            }
-            if (typeof strategy_category !== "undefined") {
-              res.strategy_category = strategy_category;
-            }
-            if (typeof learning_strategy !== "undefined") {
-              res.strategy = learning_strategy;
-            }
-            if (typeof rec_followed !== "undefined") {
-              res.rec_followed = rec_followed;
+            // res.story = convo.vars.story;
+            if ("rec_followed" in convo.vars) {
+              res.rec_followed = convo.vars.rec_followed;
             }
 
             if (!res.in_action.toLowerCase().includes("no")) {

@@ -15,6 +15,7 @@ var bot_options = {
     clientSigningSecret: process.env.clientSigningSecret,
     debug: true,
     scopes: ['bot']
+    // interactive_replies:true
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
