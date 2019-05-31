@@ -10,10 +10,10 @@ const { createMessageAdapter } = require('@slack/interactive-messages');
 // var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 
 module.exports = function(controller) {
-    var env = require('node-env-file'); // comment out for Heroku
-    path = require('path');
-    let reqPath = path.join(__dirname, '../.env');
-    env(reqPath);
+    // var env = require('node-env-file'); // comment out for Heroku
+    // path = require('path');
+    // let reqPath = path.join(__dirname, '../.env');
+    // env(reqPath);
     const slackInteractions = createMessageAdapter(process.env.clientSigningSecret);
     var webserver = express();
     webserver.use(function(req, res, next) {

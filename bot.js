@@ -1,10 +1,10 @@
-var env = require('node-env-file'); // Needed for local build, comment out for Heroku
+// var env = require('node-env-file'); // Needed for local build, comment out for Heroku
 var monk = require('monk');
 
-env(__dirname + '/.env');
-if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
-  usage_tip();
-}
+// env(__dirname + '/.env');
+// if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
+//   usage_tip();
+// }
 
 var Botkit = require('botkit');
 var debug = require('debug')('botkit:main');
@@ -223,48 +223,42 @@ async function getAllCollections() {
     throw new Error(err);
   });
   const users = db.get('users');
-  var collections = await users.find({ 'userRealName': { '$exists': true } }).sort({'userRealName': 1}).then((docs) => {
+  var collections = await users.find({ 'userRealName': { '$exists': true }}).then((docs) => {
     return docs;
-  });
+  }).catch((err) => {console.error(err)});
   var distinct_users = await users.distinct('userRealName').then((docs) => {
     return docs;
-  });
+  }).catch((err) => {console.error(err)});
   var res = {};
-  for (user in distinct_users) {
-    res[user] = [];
+  for (var i=0; i<distinct_users.length; i++) {
+    res[distinct_users[i]] = [];
   }
-  for (c in collections) {
-    if (c.userRealName in res) {
-      for (doc in res[c.userRealName]) {
-        var a = new Date(c.time); // sort by most recent reflections
-        var b = new Date(doc.time);
-        if (a < b) {
-          var ind = res[c.userRealName].indexOf(doc);
-          res[c.userRealName].splice(ind,0,c); // insert new collection without deleting existing items
-        }
-      }
+  for (var i=0; i<collections.length; i++) {
+    var user = collections[i].userRealName;
+    if (user in res) {
+      res[user].unshift(collections[i]);
     }
   }
   return res; // returns a nested collection {user: [reflections], user1: [reflections] ... }
 }
 
-webserver.get('/mentors', function(req,res)) {
+webserver.get('/mentors', function(req,res) {
   try {
-    var data = getAllCollections().then((data) => {
+    getAllCollections().then((data) => {
       if ((typeof data === 'undefined') || (data.length === 0)) {
         return res.redirect('no_data.html');
       }
-    });
-    return res.render('mentors', {
-      data: data,
-      layout: 'layouts/default'
+      return res.render('mentors', {
+        data: data,
+        layout: 'layouts/default'
+      });
     });
   }
   catch (err) {
     console.error(err);
     return res.redirect('no_data.html');
   }
-}
+});
 
 webserver.get('/home', function(req,res) {
   var user_id = req.universalCookies.get('user_id');
