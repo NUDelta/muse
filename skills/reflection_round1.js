@@ -49,6 +49,7 @@ module.exports = function(controller,slackInteractions) {
             if (typeof convo.vars.strategy_recommendation !== "undefined") {
               console.log("strategy_recommendation not undefined");
               console.log(strategy_recommendation);
+              convo.setVar('rec',strategy_recommendation);
               if (learning_strategy === strategy_recommendation) {
                 rec_followed = true;
                 console.log("setting rec_followed to true");
@@ -773,6 +774,9 @@ the need to adjust your direction? Explain why, and if you need to make changes,
             // res.story = convo.vars.story;
             if ("rec_followed" in convo.vars) {
               res.rec_followed = convo.vars.rec_followed;
+            }
+            if ("rec" in convo.vars) {
+              res.rec = convo.vars.rec;
             }
 
             if (!res.in_action.toLowerCase().includes("no")) {

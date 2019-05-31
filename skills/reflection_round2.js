@@ -163,7 +163,7 @@ session? Did you feel the need to make any changes to your process? Why or why n
           if (convo.status == 'completed') {
             // TODO: Set timeout for unfinished reflections
             var res = convo.extractResponses(); // Get the values for each reflection response
-            res.time = new Date();
+            res.time = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
             res.round = 2;
             res.id = message.user; // ID is Slack user ID
 

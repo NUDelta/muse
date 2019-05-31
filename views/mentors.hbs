@@ -1,0 +1,131 @@
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
+</head>
+  <body>
+    <div class="container-fluid">
+      <div class="tab">
+        {{#each data}}
+          <button class="tablinks" onclick="openHistory(event, '{{@key}}')">{{@key}}</button>
+        {{/each}}
+      </div>
+
+      {{#each data}}
+        <div id='{{@key}}' class="tabcontent">
+          {{#each this}}
+            <div class="card">
+              <div class="card-header">
+                <h3>{{this.userRealName}} {{this.time}}</h3>
+              </div>
+              <div class="card-body">
+                <h3>Round: {{this.round}}</h3>
+                {{#if this.blocker}}
+                  <p><b><i>1. What blocker are you currently struggling with? What did you go over during SIG to overcome this blocker?</i></b></p>
+                  <p class="response">{{this.blocker}}</p>
+                {{/if}}
+                {{#if this.story}}
+                  <p><b><i>2. Choose the item that corresponds best to the sprint story you are currently working on.</i></b></p>
+                  <p class="response">{{this.story}}</p>
+                {{/if}}
+                {{#if this.story_reason}}
+                  <p><b><i>3. How will the story that you are currently working on help you overcome this blocker? How do you intend to make progress on this story during this current work session?</i></b></p>
+                  <p class="response">{{this.story_reason}}</p>
+                {{/if}}
+                {{#if this.strategy_category}}
+                  <p><b><i>4. Select the learning strategy category that will help you overcome your blocker for this sprint. Recall what you went over with your mentors during SIG to choose.</i></b></p>
+                  <p class="response">{{this.strategy_category}}</p>
+                {{/if}}
+                {{#if this.strategy}}
+                  <p><b><i>5. Out of the strategies below, which would you like to work towards improving?</i></b></p>
+                  <p class="response">{{this.strategy}}</p>
+                {{/if}}
+                {{#if this.strategy_reason}}
+                  <p><b><i>6. How will working on this strategy help you accomplish your goals?</i></b></p>
+                  <p class="response">{{this.strategy_reason}}</p>
+                {{/if}}
+                {{#if this.recap}}
+                  <p><b><i>7. Are you satisfied with your current progress, or do you feel the need to adjust your direction? Explain why, and if you need to make changes, detail what those changes would be.</i></b></p>
+                  <p class="response">{{this.recap}}</p>
+                {{/if}}
+                {{#if this.rec}}
+                  <p><b><i>What was the recommendation made to this user?</p></b></i>
+                  <p class="response">{{this.rec}}</p>
+                {{/if}}
+                {{#if this.rec_followed}}
+                  <p><b><i>Did the user follow the recommendation that was given?</p></b></i>
+                  <p class="response">{{this.rec_followed}}</p>
+                {{/if}}
+                {{#if this.rec_ignored_reason}}
+                  <p><b><i>What was the user's reasoning for how they reacted to the recommendation?</p></b></i>
+                  <p class="response">{{this.rec_ignored_reason}}</p>
+                {{/if}}
+                {{#if this.strategy_application}}
+                  <p><b><i>1. How have you made progress towards applying the strategy you mentioned previously, and how has that strategy helped you move closer to your goals?</i></b></p>
+                  <p class="response">{{this.strategy_application}}</p>
+                {{/if}}
+                {{#if this.progress}}
+                  <p><b><i>2. How do you feel about your progress during this work session? Did you feel the need to make any changes to your process? Why or why not?</i></b></p>
+                  <p>{{this.progress}}</p>
+                {{/if}}
+                {{#if this.improvement}}
+                  <p><b><i>3. What have you been doing well, and what could be improved?</i></b></p>
+                  <p class="response">{{this.improvement}}</p>
+                {{/if}}
+                {{#if this.takeaways}}
+                  <p><b><i>4. Describe your main takeaways from this work session. How did Muse affect the ways you work?</i></b></p>
+                  <p class="response">{{this.takeaways}}</p>
+                {{/if}}
+                {{#if this.chart_check}}
+                  <p><b><i>1. After taking a quick look at the data, what strategies are you applying well, and what could you improve on?</p></b></i>
+                  <p class="response">{{this.chart_check}}</p>
+                {{/if}}
+                {{#if this.response_check}}
+                  <p><b><i>2. Review your two last reflections. What stands out to you? Do you see any patterns in the strategies you apply?</p></b></i>
+                  <p class="response">{{this.response_check}}</p>
+                {{/if}}
+                {{#if this.strategy_check}}
+                  <p><b><i>3. Are there specific strategies that you think are helpful for specific stories? If there are or are not, explain why.</p></b></i>
+                  <p class="response">{{this.strategy_check}}</p>
+                {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/each}}
+
+      <!-- {{#each data}}
+        {{#each this}}
+        <div class="card">
+          {{this.userRealName}}
+          {{this.round}}
+        </div>
+        {{/each}}
+      {{/each}} -->
+
+    </div>
+
+  </body>
+
+  <script>
+    function openHistory(evt, name) {
+      var i, tabcontent, tablinks;
+
+      tabcontent = document.getElementsByClassName("tabcontent");
+      console.log(tabcontent);
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        tabcontent[i].className = tabcontent[i].className.replace(" active-tab", "");
+      }
+
+      tablinks = document.getElementsByClassName("tablinks");
+      console.log(tablinks);
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active","");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(name).style.display = "block";
+      document.getElementById(name).className += " active-tab";
+      evt.currentTarget.className += " active";
+    }
+  </script>
