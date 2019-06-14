@@ -2,12 +2,10 @@
 A Slackbot to promote self-regulated learning and metacognitive reflection. Powered by [Botkit](https://botkit.ai/) and the [Slack API](https://api.slack.com/). To get started, run `npm install` and `npm start` to get the bot running.
 
 ## Slackbot interface
-<!-- ![Alt Text](https://github.com/NUDelta/muse/blob/master/gifs/muse.gif) -->
-<img src="https://github.com/NUDelta/muse/blob/master/gifs/muse.gif" width="250">
+<img src="https://github.com/NUDelta/muse/blob/master/gifs/muse.gif" width="400">
 
 ## Reflection Dashboard
-<!-- ![Alt Text](https://github.com/NUDelta/muse/blob/master/gifs/dashboard.gif) -->
-<img src="https://github.com/NUDelta/muse/blob/master/gifs/muse.gif" width="250">
+<img src="https://github.com/NUDelta/muse/blob/master/gifs/muse.gif" width="400">
 If you are a member of the DTR Slack, you can view your reflection dashboard [here](https://muse-delta.herokuapp.com).
 
 ## Setup
