@@ -6,7 +6,7 @@ A Slackbot to promote self-regulated learning and metacognitive reflection. Powe
 
 ## Reflection Dashboard
 <img src="https://github.com/NUDelta/muse/blob/master/gifs/dashboard.gif" width="400">
-If you are a member of the DTR Slack, you can view your reflection dashboard [(here)](https://muse-delta.herokuapp.com).
+If you are a member of the DTR Slack, you can view your reflection dashboard at https://muse-delta.herokuapp.com.
 
 ## Setup
 If you're running locally, uncomment lines 1 and 4-7 in `bot.js`. Also uncomment lines 13-16 in `components/express_webserver.js`. Make sure your `.env` file contains the following variables:
