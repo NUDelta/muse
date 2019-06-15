@@ -1,5 +1,5 @@
 # muse
-A Slackbot to promote self-regulated learning and metacognitive reflection. Powered by [Botkit](https://botkit.ai/) and the [Slack API](https://api.slack.com/). To get started, run `npm install` and `npm start` to get the bot running. If you're running the app locally, use ngrok or localtunnel for the buttons to work. You must set up a webhook for button payloads through Slack
+A Slackbot to promote self-regulated learning and metacognitive reflection. Powered by [Botkit](https://botkit.ai/) and the [Slack API](https://api.slack.com/). To get started, run `npm install` and `npm start` to get the bot running. If you're running the app locally, use ngrok or localtunnel for the buttons to work. You must set up a webhook for button payloads through Slack.
 
 ## Slackbot interface
 <img src="https://github.com/NUDelta/muse/blob/master/gifs/muse.gif" width="400">
